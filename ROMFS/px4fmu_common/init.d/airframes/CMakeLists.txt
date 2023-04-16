@@ -124,4 +124,7 @@ px4_add_romfs_files(
 	60000_uuv_generic
 	60001_uuv_hippocampus
 	60002_uuv_bluerov2_heavy
+
+	# [90000, 99999] Freeflyers
+	90000_freeflyer
 )

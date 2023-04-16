@@ -79,6 +79,8 @@ px4_add_romfs_files(
 	6011_gazebo-classic_typhoon_h480
 	6011_gazebo-classic_typhoon_h480.post
 
+	9001_gazebo-classic_freeflyer
+
 	10016_gazebo-classic_iris
 	10017_jmavsim_iris
 	10018_gazebo-classic_iris_foggy_lidar

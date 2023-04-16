@@ -27,6 +27,12 @@
             "vehicle": "typhoon_h480",
             "test_filter": "[controlallocation]",
             "timeout_min": 10
+        },
+        {
+            "model": "freeflyer",
+            "vehicle": "freeflyer",
+            "test_filter": "[controlallocation]",
+            "timeout_min": 10
         }
     ]
 }

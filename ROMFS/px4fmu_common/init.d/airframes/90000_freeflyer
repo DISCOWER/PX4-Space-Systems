@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# @name Generic Free-flyer Unmanned Vehicle
+#
+# @type Free-flyer Robot
+# @class Free-flyer Robot
+#
+# @maintainer Pedro-Roque
+#
+# @board bitcraze_crazyflie exclude
+#
+
+. ${R}etc/init.d/rc.ff_defaults
+
+# disable circuit breaker for airspeed sensor
+param set-default CBRK_AIRSPD_CHK 162128
