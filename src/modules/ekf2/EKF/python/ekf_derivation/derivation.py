@@ -101,7 +101,7 @@ def predict_covariance(
     p = sf.V3(state[State.px], state[State.py], state[State.pz])
 
     q_new = q * sf.Quaternion(sf.V3(0.5 * d_ang_true[0],  0.5 * d_ang_true[1],  0.5 * d_ang_true[2]), 1)
-    v_new = v + R_to_earth * d_vel_true + sf.V3(0 ,0 ,g) * dt
+    v_new = v + R_to_earth * d_vel_true
     p_new = p + v * dt
 
     # Predicted state vector at time t + dt
@@ -470,35 +470,6 @@ def compute_drag_y_innov_var_and_k(
     K[State.wy] = Ktotal[State.wy]
 
     return (innov_var, K)
-
-def compute_gravity_innov_var_and_k_and_h(
-        state: VState,
-        P: MState,
-        meas: sf.V3,
-        R: sf.Scalar,
-        epsilon: sf.Scalar
-) -> (sf.V3, sf.V3, VState, VState, VState):
-
-    # get transform from earth to body frame
-    R_to_body = state_to_rot3(state).inverse()
-
-    # the innovation is the error between measured acceleration
-    #  and predicted (body frame), assuming no body acceleration
-    meas_pred = R_to_body * sf.Matrix([0,0,-9.80665])
-    innov = meas_pred - 9.80665 * meas.normalized(epsilon=epsilon)
-
-    # initialize outputs
-    innov_var = sf.V3()
-    K = [None] * 3
-
-    # calculate observation jacobian (H), kalman gain (K), and innovation variance (S)
-    #  for each axis
-    for i in range(3):
-        H = sf.V1(meas_pred[i]).jacobian(state)
-        innov_var[i] = (H * P * H.T + R)[0,0]
-        K[i] = P * H.T / innov_var[i]
-
-    return (innov, innov_var, K[0], K[1], K[2])
 
 print("Derive EKF2 equations...")
 generate_px4_function(compute_airspeed_innov_and_innov_var, output_names=["innov", "innov_var"])
