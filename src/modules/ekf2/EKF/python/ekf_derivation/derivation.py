@@ -87,8 +87,6 @@ def predict_covariance(
         d_ang_var: sf.Scalar,
         dt: sf.Scalar
 ):
-    g = sf.Symbol("g") # does not appear in the jacobians
-
     d_vel_b = sf.V3(state[State.d_vel_bx], state[State.d_vel_by], state[State.d_vel_bz])
     d_vel_true = d_vel - d_vel_b
 
@@ -491,4 +489,3 @@ generate_px4_function(compute_flow_y_innov_var_and_h, output_names=["innov_var",
 generate_px4_function(compute_gnss_yaw_pred_innov_var_and_h, output_names=["meas_pred", "innov_var", "H"])
 generate_px4_function(compute_drag_x_innov_var_and_k, output_names=["innov_var", "K"])
 generate_px4_function(compute_drag_y_innov_var_and_k, output_names=["innov_var", "K"])
-generate_px4_function(compute_gravity_innov_var_and_k_and_h, output_names=["innov", "innov_var", "Kx", "Ky", "Kz"])
