@@ -117,8 +117,10 @@ def predict_covariance(
         sf.V3(0.5 * d_ang_true[0], 0.5 * d_ang_true[1], 0.5 * d_ang_true[2]), 1
     )
     if not microgravity:
+        print("   |- Using gravity")
         v_new = v + R_to_earth * d_vel_true + sf.V3(0, 0, g) * dt
     else:
+        print("   |- Using no gravity")
         v_new = v + R_to_earth * d_vel_true
     p_new = p + v * dt
 
