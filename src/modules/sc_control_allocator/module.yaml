@@ -1,0 +1,447 @@
+__max_num_motors: &max_num_motors 8
+__max_num_thrusters: &max_num_thrusters 8
+
+module_name: Spacecraft Control Allocation
+
+parameters:
+    - group: Geometry
+      definitions:
+        SC_CA_AIRFRAME:
+            description:
+                short: Frame selection
+                long: |
+                  Defines which mixer implementation to use.
+                  We consider both 2D and 3D platforms, and usage of propellers for ground-testing with external dynamics.
+
+                  'Custom' should only be used if noting else can be used.
+            type: enum
+            values:
+                0: 2D Spacecraft
+                1: 3D Spacecraft
+                2: 2D Spacecraft with propellers
+            default: 0
+
+        SC_CA_METHOD:
+            description:
+                short: Control allocation method
+                long: |
+                  Selects the algorithm for allocation.
+                  If set to Automtic, the selection is based on the airframe (CA_AIRFRAME).
+            type: enum
+            values:
+                0: Pseudo-inverse with output clipping
+                1: Pseudo-inverse with sequential desaturation technique
+                2: Automatic
+                4: Static matrix
+            default: 0
+
+        # Motor parameters
+        SC_CA_R_REV:
+            description:
+                short: Bidirectional/Reversible motors
+                long: |
+                  Configure motors to be bidirectional/reversible. 
+                  Note that the output driver needs to support this as well.
+                  Only applicable for motors, not to thrusters.
+            type: bitmask
+            bit:
+                0: Motor 1
+                1: Motor 2
+                2: Motor 3
+                3: Motor 4
+                4: Motor 5
+                5: Motor 6
+                6: Motor 7
+                7: Motor 8
+            default: 0
+        SC_CA_R${i}_SLEW:
+            description:
+                short: Motor ${i} slew rate limit
+                long: |
+                  Minimum time allowed for the motor input signal to pass through
+                  the full output range. A value x means that the motor signal
+                  can only go from 0 to 1 in minimum x seconds (in case of
+                  reversible motors, the range is -1 to 1).
+
+                  Zero means that slew rate limiting is disabled.
+            type: float
+            decimal: 2
+            increment: 0.01
+            num_instances: *max_num_motors
+            min: 0
+            max: 10
+            default: 0.0
+
+
+        # (MC) Rotors
+        SC_CA_ROTOR_COUNT:
+            description:
+                short: Total number of rotors
+            type: enum
+            values:
+                0: '0'
+                1: '1'
+                2: '2'
+                3: '3'
+                4: '4'
+                5: '5'
+                6: '6'
+                7: '7'
+                8: '8'
+            default: 0
+        SC_CA_ROTOR${i}_PX:
+            description:
+                short: Position of rotor ${i} along X body axis
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_motors
+            min: -100
+            max: 100
+            default: 0.0
+        SC_CA_ROTOR${i}_PY:
+            description:
+                short: Position of rotor ${i} along Y body axis
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_motors
+            min: -100
+            max: 100
+            default: 0.0
+        SC_CA_ROTOR${i}_PZ:
+            description:
+                short: Position of rotor ${i} along Z body axis
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_motors
+            min: -100
+            max: 100
+            default: 0.0
+
+        SC_CA_ROTOR${i}_AX:
+            description:
+                short: Axis of rotor ${i} thrust vector, X body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_motors
+            min: -100
+            max: 100
+            default: 0.0
+        SC_CA_ROTOR${i}_AY:
+            description:
+                short: Axis of rotor ${i} thrust vector, Y body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_motors
+            min: -100
+            max: 100
+            default: 0.0
+        SC_CA_ROTOR${i}_AZ:
+            description:
+                short: Axis of rotor ${i} thrust vector, Z body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_motors
+            min: -100
+            max: 100
+            default: -1.0
+
+        SC_CA_ROTOR${i}_CT:
+            description:
+                short: Thrust coefficient of rotor ${i}
+                long: |
+                  The thrust coefficient if defined as Thrust = CT * u^2,
+                  where u (with value between actuator minimum and maximum)
+                  is the output signal sent to the motor controller.
+            type: float
+            decimal: 1
+            increment: 1
+            num_instances: *max_num_motors
+            min: 0
+            max: 100
+            default: 6.5
+
+        SC_CA_ROTOR${i}_KM:
+            description:
+                short: Moment coefficient of rotor ${i}
+                long: |
+                  The moment coefficient if defined as Torque = KM * Thrust.
+
+                  Use a positive value for a rotor with CCW rotation.
+                  Use a negative value for a rotor with CW rotation.
+            type: float
+            decimal: 3
+            increment: 0.01
+            num_instances: *max_num_motors
+            min: -1
+            max: 1
+            default: 0.05
+
+        # (MC) Rotors
+        SC_CA_THRUSTER_COUNT:
+            description:
+                short: Total number of thrusters
+            type: enum
+            values:
+                0: '0'
+                1: '1'
+                2: '2'
+                3: '3'
+                4: '4'
+                5: '5'
+                6: '6'
+                7: '7'
+                8: '8'
+            default: 0
+        SC_CA_THRUSTER${i}_PX:
+            description:
+                short: Position of thruster ${i} along X body axis
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_thrusters
+            min: -100
+            max: 100
+            default: 0.0
+        SC_CA_THRUSTER${i}_PY:
+            description:
+                short: Position of thruster ${i} along Y body axis
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_thrusters
+            min: -100
+            max: 100
+            default: 0.0
+        SC_CA_THRUSTER${i}_PZ:
+            description:
+                short: Position of thruster ${i} along Z body axis
+            type: float
+            decimal: 2
+            increment: 0.1
+            unit: m
+            num_instances: *max_num_thrusters
+            min: -100
+            max: 100
+            default: 0.0
+
+        SC_CA_THRUSTER${i}_AX:
+            description:
+                short: Axis of thruster ${i} thrust vector, X body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_thrusters
+            min: -100
+            max: 100
+            default: 0.0
+        SC_CA_THRUSTER${i}_AY:
+            description:
+                short: Axis of thruster ${i} thrust vector, Y body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_thrusters
+            min: -100
+            max: 100
+            default: 0.0
+        SC_CA_THRUSTER${i}_AZ:
+            description:
+                short: Axis of thruster ${i} thrust vector, Z body axis component
+                long: Only the direction is considered (the vector is normalized).
+            type: float
+            decimal: 2
+            increment: 0.1
+            num_instances: *max_num_thrusters
+            min: -100
+            max: 100
+            default: -1.0
+
+        SC_CA_THRUSTER${i}_CT:
+            description:
+                short: Thrust coefficient of thruster ${i}
+                long: |
+                  The thrust coefficient if defined as Thrust = CT * u^2,
+                  where u (with value between actuator minimum and maximum)
+                  is the output signal sent to the motor controller.
+            type: float
+            decimal: 1
+            increment: 1
+            num_instances: *max_num_thrusters
+            min: 0
+            max: 100
+            default: 6.5
+
+        SC_CA_THRUSTER${i}_KM:
+            description:
+                short: Moment coefficient of thruster ${i}
+                long: |
+                  The moment coefficient if defined as Torque = KM * Thrust.
+            type: float
+            decimal: 3
+            increment: 0.01
+            num_instances: *max_num_motors
+            min: -1
+            max: 1
+            default: 0.05
+
+        # Others
+        SC_CA_FAILURE_MODE:
+            description:
+                short: Motor failure handling mode
+                long: |
+                    This is used to specify how to handle motor failures
+                    reported by failure detector.
+            type: enum
+            values:
+                0: Ignore
+                1: Remove first failed motor from effectiveness
+            default: 0
+
+        SC_CA_THRUSTER_FAILURE_MODE:
+            description:
+                short: Motor failure handling mode
+                long: |
+                    This is used to specify how to handle motor failures
+                    reported by failure detector.
+            type: enum
+            values:
+                0: Ignore
+                1: Remove first failed motor from effectiveness
+            default: 0
+
+# Mixer
+mixer:
+    actuator_types:
+        motor:
+            functions: 'Motor'
+            actuator_testing_values:
+                min: 0
+                max: 1
+                default_is_nan: true
+            per_item_parameters:
+              - name: 'SC_CA_R_REV'
+                label: 'Bidirectional'
+                show_as: 'bitset'
+                index_offset: 0
+                advanced: true
+              - name: 'SC_CA_R${i}_SLEW'
+                label: 'Slew Rate'
+                index_offset: 0
+                advanced: true
+        thruster:
+            functions: 'Thruster'
+            actuator_testing_values:
+                min: 0
+                max: 1
+                default_is_nan: true
+        DEFAULT:
+            actuator_testing_values:
+                min: -1
+                max: 1
+                default: -1
+
+    config:
+        param: SA_CA_AIRFRAME
+        types:
+            0: # Multirotor
+                type: '2d_spacecraft'
+                title: '2D Spacecraft'
+                actuators:
+                  - actuator_type: 'thruster'
+                    count: 'SC_CA_THRUSTER_COUNT'
+                    per_item_parameters:
+                        standard:
+                            position: [ 'SC_CA_THRUSTER${i}_PX', 'SC_CA_THRUSTER${i}_PY', 'SC_CA_THRUSTER${i}_PZ' ]
+                        extra:
+                          - name: 'SC_CA_THRUSTER${i}_AX'
+                            label: 'Axis X'
+                            function: 'axisx'
+                            advanced: true
+                          - name: 'SC_CA_THRUSTER${i}_AY'
+                            label: 'Axis Y'
+                            function: 'axisy'
+                            advanced: true
+                          - name: 'SC_CA_THRUSTER${i}_AZ'
+                            label: 'Axis Z'
+                            function: 'axisz'
+                            advanced: true
+
+            1: # Fixed Wing
+                title: '3D Spacecraft'
+                actuators:
+                  - actuator_type: 'thruster'
+                    count: 'SC_CA_THRUSTER_COUNT'
+                    per_item_parameters:
+                        standard:
+                            position: [ 'SC_CA_THRUSTER${i}_PX', 'SC_CA_THRUSTER${i}_PY', 'SC_CA_THRUSTER${i}_PZ' ]
+                        extra:
+                          - name: 'SC_CA_THRUSTER${i}_AX'
+                            label: 'Axis X'
+                            function: 'axisx'
+                            advanced: true
+                          - name: 'SC_CA_THRUSTER${i}_AY'
+                            label: 'Axis Y'
+                            function: 'axisy'
+                            advanced: true
+                          - name: 'SC_CA_THRUSTER${i}_AZ'
+                            label: 'Axis Z'
+                            function: 'axisz'
+                            advanced: true
+
+            2: # Standard VTOL
+                title: '2D Spacecraft with Propellers'
+                actuators:
+                  - actuator_type: 'motor'
+                    group_label: 'Motors'
+                    count: 'SC_CA_ROTOR_COUNT'
+                    per_item_parameters:
+                        standard:
+                            position: [ 'CA_ROTOR${i}_PX', 'CA_ROTOR${i}_PY', 'CA_ROTOR${i}_PZ' ]
+                        extra:
+                          - name: 'CA_ROTOR${i}_KM'
+                            label: 'Direction CCW'
+                            function: 'spin-dir'
+                            show_as: 'true-if-positive'
+                          - name: 'CA_ROTOR${i}_AX'
+                            label: 'Axis X'
+                            function: 'axisx'
+                          - name: 'CA_ROTOR${i}_AY'
+                            label: 'Axis Y'
+                            function: 'axisy'
+                          - name: 'CA_ROTOR${i}_AZ'
+                            label: 'Axis Z'
+                            function: 'axisz'
+                  - actuator_type: 'thruster'
+                    count: 'SC_CA_THRUSTER_COUNT'
+                    per_item_parameters:
+                        standard:
+                            position: [ 'SC_CA_THRUSTER${i}_PX', 'SC_CA_THRUSTER${i}_PY', 'SC_CA_THRUSTER${i}_PZ' ]
+                        extra:
+                          - name: 'SC_CA_THRUSTER${i}_AX'
+                            label: 'Axis X'
+                            function: 'axisx'
+                            advanced: true
+                          - name: 'SC_CA_THRUSTER${i}_AY'
+                            label: 'Axis Y'
+                            function: 'axisy'
+                            advanced: true
+                          - name: 'SC_CA_THRUSTER${i}_AZ'
+                            label: 'Axis Z'
+                            function: 'axisz'
+                            advanced: true
