@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file ControlAllocator.hpp
+ * @file SpacecraftControlAllocator.hpp
  *
  * Control allocator.
  *
@@ -78,7 +78,7 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/failure_detector_status.h>
 
-class ControlAllocator : public ModuleBase<ControlAllocator>, public ModuleParams, public px4::ScheduledWorkItem
+class SpacecraftControlAllocator : public ModuleBase<SpacecraftControlAllocator>, public ModuleParams, public px4::ScheduledWorkItem
 {
 public:
 	static constexpr int NUM_ACTUATORS = ControlAllocation::NUM_ACTUATORS;
@@ -89,9 +89,9 @@ public:
 
 	using ActuatorVector = ActuatorEffectiveness::ActuatorVector;
 
-	ControlAllocator();
+	SpacecraftControlAllocator();
 
-	virtual ~ControlAllocator();
+	virtual ~SpacecraftControlAllocator();
 
 	/** @see ModuleBase */
 	static int task_spawn(int argc, char *argv[]);

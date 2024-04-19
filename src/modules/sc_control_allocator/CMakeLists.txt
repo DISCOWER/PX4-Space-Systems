@@ -36,8 +36,8 @@ add_subdirectory(ActuatorEffectiveness)
 add_subdirectory(ControlAllocation)
 
 px4_add_module(
-	MODULE modules__control_allocator
-	MAIN control_allocator
+	MODULE modules__sc_control_allocator
+	MAIN sc_control_allocator
 	COMPILE_FLAGS
 		${MAX_CUSTOM_OPT_LEVEL}
 	STACK_MAIN

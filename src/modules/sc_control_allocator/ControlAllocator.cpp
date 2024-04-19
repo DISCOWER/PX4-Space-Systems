@@ -32,14 +32,14 @@
  ****************************************************************************/
 
 /**
- * @file ControlAllocator.cpp
+ * @file SpacecraftControlAllocator.cpp
  *
  * Control allocator.
  *
  * @author Julien Lecoeur <julien.lecoeur@gmail.com>
  */
 
-#include "ControlAllocator.hpp"
+#include "SpacecraftControlAllocator.hpp"
 
 #include <drivers/drv_hrt.h>
 #include <circuit_breaker/circuit_breaker.h>
@@ -49,7 +49,7 @@
 using namespace matrix;
 using namespace time_literals;
 
-ControlAllocator::ControlAllocator() :
+SpacecraftControlAllocator::SpacecraftControlAllocator() :
 	ModuleParams(nullptr),
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::rate_ctrl),
 	_loop_perf(perf_alloc(PC_ELAPSED, MODULE_NAME": cycle"))
@@ -76,7 +76,7 @@ ControlAllocator::ControlAllocator() :
 	parameters_updated();
 }
 
-ControlAllocator::~ControlAllocator()
+SpacecraftControlAllocator::~SpacecraftControlAllocator()
 {
 	for (int i = 0; i < ActuatorEffectiveness::MAX_NUM_MATRICES; ++i) {
 		delete _control_allocation[i];
@@ -88,7 +88,7 @@ ControlAllocator::~ControlAllocator()
 }
 
 bool
-ControlAllocator::init()
+SpacecraftControlAllocator::init()
 {
 	if (!_vehicle_torque_setpoint_sub.registerCallback()) {
 		PX4_ERR("callback registration failed");
@@ -108,7 +108,7 @@ ControlAllocator::init()
 }
 
 void
-ControlAllocator::parameters_updated()
+SpacecraftControlAllocator::parameters_updated()
 {
 	_has_slew_rate = false;
 
@@ -139,7 +139,7 @@ ControlAllocator::parameters_updated()
 }
 
 void
-ControlAllocator::update_allocation_method(bool force)
+SpacecraftControlAllocator::update_allocation_method(bool force)
 {
 	AllocationMethod configured_method = (AllocationMethod)_param_ca_method.get();
 
@@ -207,7 +207,7 @@ ControlAllocator::update_allocation_method(bool force)
 }
 
 bool
-ControlAllocator::update_effectiveness_source()
+SpacecraftControlAllocator::update_effectiveness_source()
 {
 	const EffectivenessSource source = (EffectivenessSource)_param_ca_airframe.get();
 
@@ -293,7 +293,7 @@ ControlAllocator::update_effectiveness_source()
 }
 
 void
-ControlAllocator::Run()
+SpacecraftControlAllocator::Run()
 {
 	if (should_exit()) {
 		_vehicle_torque_setpoint_sub.unregisterCallback();
@@ -454,7 +454,7 @@ ControlAllocator::Run()
 }
 
 void
-ControlAllocator::update_effectiveness_matrix_if_needed(EffectivenessUpdateReason reason)
+SpacecraftControlAllocator::update_effectiveness_matrix_if_needed(EffectivenessUpdateReason reason)
 {
 	ActuatorEffectiveness::Configuration config{};
 
@@ -587,7 +587,7 @@ ControlAllocator::update_effectiveness_matrix_if_needed(EffectivenessUpdateReaso
 }
 
 void
-ControlAllocator::publish_control_allocator_status(int matrix_index)
+SpacecraftControlAllocator::publish_control_allocator_status(int matrix_index)
 {
 	control_allocator_status_s control_allocator_status{};
 	control_allocator_status.timestamp = hrt_absolute_time();
@@ -639,7 +639,7 @@ ControlAllocator::publish_control_allocator_status(int matrix_index)
 }
 
 void
-ControlAllocator::publish_actuator_controls()
+SpacecraftControlAllocator::publish_actuator_controls()
 {
 	actuator_motors_s actuator_motors;
 	actuator_motors.timestamp = hrt_absolute_time();
@@ -699,7 +699,7 @@ ControlAllocator::publish_actuator_controls()
 }
 
 void
-ControlAllocator::check_for_motor_failures()
+SpacecraftControlAllocator::check_for_motor_failures()
 {
 	failure_detector_status_s failure_detector_status;
 
@@ -748,9 +748,9 @@ ControlAllocator::check_for_motor_failures()
 	}
 }
 
-int ControlAllocator::task_spawn(int argc, char *argv[])
+int SpacecraftControlAllocator::task_spawn(int argc, char *argv[])
 {
-	ControlAllocator *instance = new ControlAllocator();
+	SpacecraftControlAllocator *instance = new SpacecraftControlAllocator();
 
 	if (instance) {
 		_object.store(instance);
@@ -771,7 +771,7 @@ int ControlAllocator::task_spawn(int argc, char *argv[])
 	return PX4_ERROR;
 }
 
-int ControlAllocator::print_status()
+int SpacecraftControlAllocator::print_status()
 {
 	PX4_INFO("Running");
 
@@ -827,12 +827,12 @@ int ControlAllocator::print_status()
 	return 0;
 }
 
-int ControlAllocator::custom_command(int argc, char *argv[])
+int SpacecraftControlAllocator::custom_command(int argc, char *argv[])
 {
 	return print_usage("unknown command");
 }
 
-int ControlAllocator::print_usage(const char *reason)
+int SpacecraftControlAllocator::print_usage(const char *reason)
 {
 	if (reason) {
 		PX4_WARN("%s\n", reason);
@@ -841,11 +841,11 @@ int ControlAllocator::print_usage(const char *reason)
 	PRINT_MODULE_DESCRIPTION(
 		R"DESCR_STR(
 ### Description
-This implements control allocation. It takes torque and thrust setpoints
+This implements control allocation for spacecrafts. It takes torque and thrust setpoints
 as inputs and outputs actuator setpoint messages.
 )DESCR_STR");
 
-	PRINT_MODULE_USAGE_NAME("control_allocator", "controller");
+	PRINT_MODULE_USAGE_NAME("sc_control_allocator", "controller");
 	PRINT_MODULE_USAGE_COMMAND("start");
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 
@@ -855,9 +855,9 @@ as inputs and outputs actuator setpoint messages.
 /**
  * Control Allocator app start / stop handling function
  */
-extern "C" __EXPORT int control_allocator_main(int argc, char *argv[]);
+extern "C" __EXPORT int sc_control_allocator_main(int argc, char *argv[]);
 
-int control_allocator_main(int argc, char *argv[])
+int sc_control_allocator_main(int argc, char *argv[])
 {
-	return ControlAllocator::main(argc, argv);
+	return SpacecraftControlAllocator::main(argc, argv);
 }
