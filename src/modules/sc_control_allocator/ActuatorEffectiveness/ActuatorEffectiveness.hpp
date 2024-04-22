@@ -51,11 +51,12 @@ enum class AllocationMethod {
 	PSEUDO_INVERSE = 0,
 	SEQUENTIAL_DESATURATION = 1,
 	AUTO = 2,
+	STATIC = 3,
 };
 
 enum class ActuatorType {
 	MOTORS = 0,
-	SERVOS,
+	THRUSTER,
 
 	COUNT
 };
@@ -90,13 +91,6 @@ public:
 	using EffectivenessMatrix = matrix::Matrix<float, NUM_AXES, NUM_ACTUATORS>;
 	using ActuatorVector = matrix::Vector<float, NUM_ACTUATORS>;
 
-	enum class FlightPhase {
-		HOVER_FLIGHT = 0,
-		FORWARD_FLIGHT = 1,
-		TRANSITION_HF_TO_FF = 2,
-		TRANSITION_FF_TO_HF = 3
-	};
-
 	struct Configuration {
 		/**
 		 * Add an actuator to the selected matrix, returning the index, or -1 on error
@@ -123,16 +117,6 @@ public:
 		uint8_t matrix_selection_indexes[NUM_ACTUATORS * MAX_NUM_MATRICES];
 		int num_actuators[(int)ActuatorType::COUNT];
 	};
-
-	/**
-	 * Set the current flight phase
-	 *
-	 * @param Flight phase
-	 */
-	virtual void setFlightPhase(const FlightPhase &flight_phase)
-	{
-		_flight_phase = flight_phase;
-	}
 
 	/**
 	 * Get the number of effectiveness matrices. Must be <= MAX_NUM_MATRICES.
@@ -166,16 +150,6 @@ public:
 	 * @return true if updated and matrix is set
 	 */
 	virtual bool getEffectivenessMatrix(Configuration &configuration, EffectivenessUpdateReason external_update) { return false;}
-
-	/**
-	 * Get the current flight phase
-	 *
-	 * @return Flight phase
-	 */
-	const FlightPhase &getFlightPhase() const
-	{
-		return _flight_phase;
-	}
 
 	/**
 	 * Display name
@@ -220,6 +194,5 @@ public:
 	virtual void stopMaskedMotorsWithZeroThrust(uint32_t stoppable_motors_mask, ActuatorVector &actuator_sp);
 
 protected:
-	FlightPhase _flight_phase{FlightPhase::HOVER_FLIGHT};
 	uint32_t _stopped_motors_mask{0};
 };

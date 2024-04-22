@@ -43,8 +43,8 @@ px4_add_module(
 	STACK_MAIN
 		3000
 	SRCS
-		ControlAllocator.cpp
-		ControlAllocator.hpp
+		SpacecraftControlAllocator.cpp
+		SpacecraftControlAllocator.hpp
 	MODULE_CONFIG
 		module.yaml
 	DEPENDS

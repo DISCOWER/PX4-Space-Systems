@@ -34,7 +34,8 @@
 /**
  * @file SpacecraftControlAllocator.cpp
  *
- * Control allocator.
+ * Control allocator for Spacecrafts.
+ * This module is in metric units.
  *
  * @author Julien Lecoeur <julien.lecoeur@gmail.com>
  */
@@ -59,18 +60,11 @@ SpacecraftControlAllocator::SpacecraftControlAllocator() :
 
 	_actuator_motors_pub.advertise();
 	_actuator_servos_pub.advertise();
-	_actuator_servos_trim_pub.advertise();
 
 	for (int i = 0; i < MAX_NUM_MOTORS; ++i) {
 		char buffer[17];
-		snprintf(buffer, sizeof(buffer), "CA_R%u_SLEW", i);
+		snprintf(buffer, sizeof(buffer), "SC_CA_R%u_SLEW", i);
 		_param_handles.slew_rate_motors[i] = param_find(buffer);
-	}
-
-	for (int i = 0; i < MAX_NUM_SERVOS; ++i) {
-		char buffer[17];
-		snprintf(buffer, sizeof(buffer), "CA_SV%u_SLEW", i);
-		_param_handles.slew_rate_servos[i] = param_find(buffer);
 	}
 
 	parameters_updated();
@@ -91,12 +85,22 @@ bool
 SpacecraftControlAllocator::init()
 {
 	if (!_vehicle_torque_setpoint_sub.registerCallback()) {
-		PX4_ERR("callback registration failed");
+		PX4_ERR("callback to primary torque setpoint registration failed");
 		return false;
 	}
 
 	if (!_vehicle_thrust_setpoint_sub.registerCallback()) {
-		PX4_ERR("callback registration failed");
+		PX4_ERR("callback to primary thrust setpoint registration failed");
+		return false;
+	}
+
+	if (!_vehicle_torque_setpoint1_sub.registerCallback()) {
+		PX4_ERR("callback to secondary torque setpoint registration failed");
+		return false;
+	}
+
+	if (!_vehicle_thrust_setpoint1_sub.registerCallback()) {
+		PX4_ERR("callback to secondary thrust setpoint registration failed");
 		return false;
 	}
 
@@ -115,11 +119,6 @@ SpacecraftControlAllocator::parameters_updated()
 	for (int i = 0; i < MAX_NUM_MOTORS; ++i) {
 		param_get(_param_handles.slew_rate_motors[i], &_params.slew_rate_motors[i]);
 		_has_slew_rate |= _params.slew_rate_motors[i] > FLT_EPSILON;
-	}
-
-	for (int i = 0; i < MAX_NUM_SERVOS; ++i) {
-		param_get(_param_handles.slew_rate_servos[i], &_params.slew_rate_servos[i]);
-		_has_slew_rate |= _params.slew_rate_servos[i] > FLT_EPSILON;
 	}
 
 	// Allocation method & effectiveness source
@@ -175,16 +174,27 @@ SpacecraftControlAllocator::update_allocation_method(bool force)
 			AllocationMethod method = configured_method;
 
 			if (configured_method == AllocationMethod::AUTO) {
-				method = desired_methods[i];
+				// TODO: Test in this new allocator
+				PX4_ERR("Allocation method not implemented");
+				//method = desired_methods[i];
+				_allocation_method_id = configured_method;
 			}
 
 			switch (method) {
 			case AllocationMethod::PSEUDO_INVERSE:
-				_control_allocation[i] = new ControlAllocationPseudoInverse();
+				// TODO: Test in this new allocator
+				PX4_ERR("Allocation method not implemented");
+				//_control_allocation[i] = new ControlAllocationPseudoInverse();
 				break;
 
 			case AllocationMethod::SEQUENTIAL_DESATURATION:
-				_control_allocation[i] = new ControlAllocationSequentialDesaturation();
+				// TODO: Test in this new allocator
+				PX4_ERR("Allocation method not implemented");
+				//_control_allocation[i] = new ControlAllocationSequentialDesaturation();
+				break;
+
+			case AllocationMethod::STATIC:
+				_control_allocation[i] = new ControlAllocationStatic();
 				break;
 
 			default:
@@ -209,7 +219,7 @@ SpacecraftControlAllocator::update_allocation_method(bool force)
 bool
 SpacecraftControlAllocator::update_effectiveness_source()
 {
-	const EffectivenessSource source = (EffectivenessSource)_param_ca_airframe.get();
+	const EffectivenessSource source = (EffectivenessSource)_param_sc_ca_airframe.get();
 
 	if (_effectiveness_source_id != source) {
 
@@ -218,56 +228,28 @@ SpacecraftControlAllocator::update_effectiveness_source()
 
 		switch (source) {
 		case EffectivenessSource::NONE:
-		case EffectivenessSource::MULTIROTOR:
+		case EffectivenessSource::SPACECRAFT_2D:
 			tmp = new ActuatorEffectivenessMultirotor(this);
 			break;
 
-		case EffectivenessSource::STANDARD_VTOL:
+		case EffectivenessSource::SPACECRAFT_3D:
 			tmp = new ActuatorEffectivenessStandardVTOL(this);
 			break;
 
-		case EffectivenessSource::TILTROTOR_VTOL:
+		case EffectivenessSource::PROPELLED_2D:
 			tmp = new ActuatorEffectivenessTiltrotorVTOL(this);
 			break;
 
-		case EffectivenessSource::TAILSITTER_VTOL:
-			tmp = new ActuatorEffectivenessTailsitterVTOL(this);
+		case EffectivenessSource::PROPELLED_3D:
+			tmp = new ActuatorEffectivenessTiltrotorVTOL(this);
 			break;
 
-		case EffectivenessSource::ROVER_ACKERMANN:
-			tmp = new ActuatorEffectivenessRoverAckermann();
-			break;
-
-		case EffectivenessSource::ROVER_DIFFERENTIAL:
-			tmp = new ActuatorEffectivenessRoverDifferential();
-			break;
-
-		case EffectivenessSource::FIXED_WING:
-			tmp = new ActuatorEffectivenessFixedWing(this);
-			break;
-
-		case EffectivenessSource::MOTORS_6DOF: // just a different UI from MULTIROTOR
-			tmp = new ActuatorEffectivenessUUV(this);
-			break;
-
-		case EffectivenessSource::MULTIROTOR_WITH_TILT:
-			tmp = new ActuatorEffectivenessMCTilt(this);
-			break;
-
-		case EffectivenessSource::CUSTOM:
-			tmp = new ActuatorEffectivenessCustom(this);
-			break;
-
-		case EffectivenessSource::HELICOPTER_TAIL_ESC:
-			tmp = new ActuatorEffectivenessHelicopter(this, ActuatorType::MOTORS);
-			break;
-
-		case EffectivenessSource::HELICOPTER_TAIL_SERVO:
-			tmp = new ActuatorEffectivenessHelicopter(this, ActuatorType::SERVOS);
+		case EffectivenessSource::SPACECRAFT_2D_EXTRA_PROPELLERS:
+			tmp = new ActuatorEffectivenessTiltrotorVTOL(this);
 			break;
 
 		default:
-			PX4_ERR("Unknown airframe");
+			PX4_ERR("Unknown spacecraft frame");
 			break;
 		}
 
@@ -275,7 +257,7 @@ SpacecraftControlAllocator::update_effectiveness_source()
 		if (tmp == nullptr) {
 			// It did not work, forget about it
 			PX4_ERR("Actuator effectiveness init failed");
-			_param_ca_airframe.set((int)_effectiveness_source_id);
+			_param_sc_ca_airframe.set((int)_effectiveness_source_id);
 
 		} else {
 			// Swap effectiveness sources
@@ -298,6 +280,8 @@ SpacecraftControlAllocator::Run()
 	if (should_exit()) {
 		_vehicle_torque_setpoint_sub.unregisterCallback();
 		_vehicle_thrust_setpoint_sub.unregisterCallback();
+		_vehicle_torque_setpoint1_sub.unregisterCallback();
+		_vehicle_thrust_setpoint1_sub.unregisterCallback();
 		exit_and_cleanup();
 		return;
 	}
@@ -790,6 +774,10 @@ int SpacecraftControlAllocator::print_status()
 		break;
 
 	case AllocationMethod::AUTO:
+		PX4_INFO("Method: Auto");
+		break;
+
+	case AllocationMethod::STATIC:
 		PX4_INFO("Method: Auto");
 		break;
 	}

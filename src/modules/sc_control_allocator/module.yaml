@@ -16,9 +16,9 @@ parameters:
                   'Custom' should only be used if noting else can be used.
             type: enum
             values:
-                0: 2D Spacecraft
-                1: 3D Spacecraft
-                2: 2D Spacecraft with propellers
+                0: 2D System
+                1: 3D System
+                2: 2D System with External Dynamics
             default: 0
 
         SC_CA_METHOD:
@@ -26,7 +26,7 @@ parameters:
                 short: Control allocation method
                 long: |
                   Selects the algorithm for allocation.
-                  If set to Automtic, the selection is based on the airframe (CA_AIRFRAME).
+                  If set to Automatic, the selection is based on the airframe (CA_AIRFRAME).
             type: enum
             values:
                 0: Pseudo-inverse with output clipping

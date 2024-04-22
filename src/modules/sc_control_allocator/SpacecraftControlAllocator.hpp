@@ -113,12 +113,10 @@ private:
 
 	struct ParamHandles {
 		param_t slew_rate_motors[MAX_NUM_MOTORS];
-		param_t slew_rate_servos[MAX_NUM_SERVOS];
 	};
 
 	struct Params {
 		float slew_rate_motors[MAX_NUM_MOTORS];
-		float slew_rate_servos[MAX_NUM_SERVOS];
 	};
 
 	/**
@@ -144,18 +142,12 @@ private:
 
 	enum class EffectivenessSource {
 		NONE = -1,
-		MULTIROTOR = 0,
-		FIXED_WING = 1,
-		STANDARD_VTOL = 2,
-		TILTROTOR_VTOL = 3,
-		TAILSITTER_VTOL = 4,
-		ROVER_ACKERMANN = 5,
-		ROVER_DIFFERENTIAL = 6,
-		MOTORS_6DOF = 7,
-		MULTIROTOR_WITH_TILT = 8,
-		CUSTOM = 9,
-		HELICOPTER_TAIL_ESC = 10,
-		HELICOPTER_TAIL_SERVO = 11,
+		SPACECRAFT_2D = 0,
+		SPACECRAFT_3D = 1,
+		PROPELLED_2D = 2,
+		PROPELLED_3D = 3,
+		SPACECRAFT_2D_EXTRA_PROPELLERS = 4,
+		CUSTOM = 5,
 	};
 
 	enum class FailureMode {
@@ -175,18 +167,17 @@ private:
 
 	uORB::Subscription _vehicle_torque_setpoint1_sub{ORB_ID(vehicle_torque_setpoint), 1};  /**< vehicle torque setpoint subscription (2. instance) */
 	uORB::Subscription _vehicle_thrust_setpoint1_sub{ORB_ID(vehicle_thrust_setpoint), 1};	 /**< vehicle thrust setpoint subscription (2. instance) */
+	
+	// Parameter updates
+	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
 
+	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
+	uORB::Subscription _failure_detector_status_sub{ORB_ID(failure_detector_status)};
 	// Outputs
 	uORB::PublicationMulti<control_allocator_status_s> _control_allocator_status_pub[2] {ORB_ID(control_allocator_status), ORB_ID(control_allocator_status)};
 
 	uORB::Publication<actuator_motors_s>	_actuator_motors_pub{ORB_ID(actuator_motors)};
 	uORB::Publication<actuator_servos_s>	_actuator_servos_pub{ORB_ID(actuator_servos)};
-	uORB::Publication<actuator_servos_trim_s>	_actuator_servos_trim_pub{ORB_ID(actuator_servos_trim)};
-
-	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
-
-	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
-	uORB::Subscription _failure_detector_status_sub{ORB_ID(failure_detector_status)};
 
 	matrix::Vector3f _torque_sp;
 	matrix::Vector3f _thrust_sp;
@@ -207,10 +198,11 @@ private:
 	bool _has_slew_rate{false};
 
 	DEFINE_PARAMETERS(
-		(ParamInt<px4::params::CA_AIRFRAME>) _param_ca_airframe,
-		(ParamInt<px4::params::CA_METHOD>) _param_ca_method,
-		(ParamInt<px4::params::CA_FAILURE_MODE>) _param_ca_failure_mode,
-		(ParamInt<px4::params::CA_R_REV>) _param_r_rev
+		(ParamInt<px4::params::SC_CA_AIRFRAME>) _param_sc_ca_airframe,
+		(ParamInt<px4::params::SC_CA_METHOD>) _param_sc_ca_method,
+		(ParamInt<px4::params::SC_CA_FAILURE_MODE>) _param_sc_ca_failure_mode,
+		(ParamInt<px4::params::SC_CA_THRUSTER_FAILURE_MODE>) _param_sc_ca_thruster_failure_mode,
+		(ParamInt<px4::params::SC_CA_R_REV>) _param_sc_r_rev
 	)
 
 };
