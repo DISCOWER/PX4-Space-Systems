@@ -89,6 +89,8 @@ void SpacecraftRateControl::parameters_updated()
 	// manual rate control acro mode rate limits
 	_acro_rate_max = Vector3f(radians(_param_sc_acro_r_max.get()), radians(_param_sc_acro_p_max.get()),
 				  radians(_param_sc_acro_y_max.get()));
+	_manual_force_max = _param_sc_manual_f_max.get();
+	_manual_torque_max = _param_sc_manual_t_max.get();
 }
 
 void SpacecraftRateControl::Run()
@@ -141,29 +143,62 @@ void SpacecraftRateControl::Run()
 		// use rates setpoint topic
 		vehicle_rates_setpoint_s vehicle_rates_setpoint{};
 
-		if (_vehicle_control_mode.flag_control_manual_enabled && !_vehicle_control_mode.flag_control_attitude_enabled) {
+		if (_vehicle_control_mode.flag_control_manual_enabled) {
 			// generate the rate setpoint from sticks
 			manual_control_setpoint_s manual_control_setpoint;
 
 			if (_manual_control_setpoint_sub.update(&manual_control_setpoint)) {
-				// manual rates control - ACRO mode
-				const Vector3f man_rate_sp{
-					math::superexpo(manual_control_setpoint.roll, _param_sc_acro_expo.get(), _param_sc_acro_supexpo.get()),
-					math::superexpo(-manual_control_setpoint.pitch, _param_sc_acro_expo.get(), _param_sc_acro_supexpo.get()),
-					math::superexpo(manual_control_setpoint.yaw, _param_sc_acro_expo_y.get(), _param_sc_acro_supexpoy.get())};
+				if (_vehicle_control_mode.flag_control_rates_enabled && !_vehicle_control_mode.flag_control_attitude_enabled) {
+					// manual rates control - ACRO mode
+					const Vector3f man_rate_sp{
+						math::superexpo(manual_control_setpoint.roll, _param_sc_acro_expo.get(), _param_sc_acro_supexpo.get()),
+						math::superexpo(-manual_control_setpoint.pitch, _param_sc_acro_expo.get(), _param_sc_acro_supexpo.get()),
+						math::superexpo(manual_control_setpoint.yaw, _param_sc_acro_expo_y.get(), _param_sc_acro_supexpoy.get())};
 
-				_rates_setpoint = man_rate_sp.emult(_acro_rate_max);
-				_thrust_setpoint(2) = -manual_control_setpoint.throttle;
-				_thrust_setpoint(0) = _thrust_setpoint(1) = 0.f;
+					_rates_setpoint = man_rate_sp.emult(_acro_rate_max);
+					_thrust_setpoint(2) = -manual_control_setpoint.throttle;
+					_thrust_setpoint(0) = _thrust_setpoint(1) = 0.f;
 
-				// publish rate setpoint
-				vehicle_rates_setpoint.roll = _rates_setpoint(0);
-				vehicle_rates_setpoint.pitch = _rates_setpoint(1);
-				vehicle_rates_setpoint.yaw = _rates_setpoint(2);
-				_thrust_setpoint.copyTo(vehicle_rates_setpoint.thrust_body);
-				vehicle_rates_setpoint.timestamp = hrt_absolute_time();
+					// publish rate setpoint
+					vehicle_rates_setpoint.roll = _rates_setpoint(0);
+					vehicle_rates_setpoint.pitch = _rates_setpoint(1);
+					vehicle_rates_setpoint.yaw = _rates_setpoint(2);
+					_thrust_setpoint.copyTo(vehicle_rates_setpoint.thrust_body);
+					vehicle_rates_setpoint.timestamp = hrt_absolute_time();
 
-				_vehicle_rates_setpoint_pub.publish(vehicle_rates_setpoint);
+					_vehicle_rates_setpoint_pub.publish(vehicle_rates_setpoint);
+
+				} else {
+					// Manual/direct control
+					// Yaw stick commands rotational moment, Roll/Pitch stick commands translational forces
+					// All other axis are set as zero (We only have four channels on the manual control inputs)
+
+					// manual rates control - ACRO mode
+					const Vector3f man_torque_sp{manual_control_setpoint.roll, -manual_control_setpoint.pitch, manual_control_setpoint.yaw};
+					///TODO: Define parameter to scale torque
+					const Vector3f torque_setpoint = man_torque_sp * _manual_torque_max;
+
+					_thrust_setpoint(0) = math::constrain((_manual_control_setpoint.pitch * _manual_force_max, -1.f, 1.f));
+					_thrust_setpoint(1) = math::constrain((_manual_control_setpoint.roll * _manual_force_max, -1.f, 1.f));
+					_thrust_setpoint(2) = 0.0;
+					// publish thrust and torque setpoints
+					vehicle_thrust_setpoint_s vehicle_thrust_setpoint{};
+					vehicle_torque_setpoint_s vehicle_torque_setpoint{};
+
+					_thrust_setpoint.copyTo(vehicle_thrust_setpoint.xyz);
+					torque_setpoint.copyTo(vehicle_torque_setpoint.xyz);
+
+					vehicle_thrust_setpoint.timestamp_sample = angular_velocity.timestamp_sample;
+					vehicle_thrust_setpoint.timestamp = hrt_absolute_time();
+					_vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
+
+					vehicle_torque_setpoint.timestamp_sample = angular_velocity.timestamp_sample;
+					vehicle_torque_setpoint.timestamp = hrt_absolute_time();
+					_vehicle_torque_setpoint_pub.publish(vehicle_torque_setpoint);
+
+					updateActuatorControlsStatus(vehicle_torque_setpoint, dt);
+
+				}
 			}
 
 		} else if (_vehicle_rates_setpoint_sub.update(&vehicle_rates_setpoint)) {
