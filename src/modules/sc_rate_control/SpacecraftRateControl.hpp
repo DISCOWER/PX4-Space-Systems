@@ -122,6 +122,8 @@ private:
 	// keep setpoint values between updates
 	matrix::Vector3f _acro_rate_max;		/**< max attitude rates in acro mode */
 	matrix::Vector3f _rates_setpoint{};
+	float _manual_torque_max{1.0};
+	float _manual_force_max{1.0};
 
 	float _battery_status_scale{0.0f};
 	matrix::Vector3f _thrust_setpoint{};
@@ -158,6 +160,9 @@ private:
 		(ParamFloat<px4::params::SC_ACRO_EXPO_Y>) _param_sc_acro_expo_y,				/**< expo stick curve shape (yaw) */
 		(ParamFloat<px4::params::SC_ACRO_SUPEXPO>) _param_sc_acro_supexpo,		/**< superexpo stick curve shape (roll & pitch) */
 		(ParamFloat<px4::params::SC_ACRO_SUPEXPOY>) _param_sc_acro_supexpoy,		/**< superexpo stick curve shape (yaw) */
+
+		(ParamFloat<px4::params::SC_MAN_F_MAX>) _param_sc_manual_f_max,
+		(ParamFloat<px4::params::SC_MAN_T_MAX>) _param_sc_manual_t_max,
 
 		(ParamBool<px4::params::SC_BAT_SCALE_EN>) _param_sc_bat_scale_en
 	)

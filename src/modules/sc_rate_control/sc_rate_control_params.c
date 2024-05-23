@@ -398,3 +398,25 @@ PARAM_DEFINE_FLOAT(SC_ACRO_SUPEXPOY, 0.7f);
  * @group Multicopter Rate Control
  */
 PARAM_DEFINE_INT32(SC_BAT_SCALE_EN, 0);
+
+/**
+ * Manual mode maximum force.
+ *
+ * *
+ * @min 0
+ * @max 1.0
+ * @decimal 2
+ * @group Multicopter Rate Control
+ */
+PARAM_DEFINE_FLOAT(SC_MAN_F_MAX, 1.0f);
+
+/**
+ * Manual mode maximum torque.
+ *
+ * *
+ * @min 0
+ * @max 1.0
+ * @decimal 2
+ * @group Multicopter Rate Control
+ */
+PARAM_DEFINE_FLOAT(SC_MAN_T_MAX, 1.0f);
