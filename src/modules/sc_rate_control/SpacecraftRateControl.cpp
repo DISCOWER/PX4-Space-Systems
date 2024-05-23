@@ -144,6 +144,7 @@ void SpacecraftRateControl::Run()
 		vehicle_rates_setpoint_s vehicle_rates_setpoint{};
 
 		if (_vehicle_control_mode.flag_control_manual_enabled) {
+			// Here we can be in: Manual Mode, Acro Mode, or Stabilized Mode
 			// generate the rate setpoint from sticks
 			manual_control_setpoint_s manual_control_setpoint;
 
@@ -168,40 +169,38 @@ void SpacecraftRateControl::Run()
 
 					_vehicle_rates_setpoint_pub.publish(vehicle_rates_setpoint);
 
-				} else {
+				} else if (!_vehicle_control_mode.flag_control_rates_enabled && !_vehicle_control_mode.flag_control_attitude_enabled) {
 					// Manual/direct control
 					// Yaw stick commands rotational moment, Roll/Pitch stick commands translational forces
 					// All other axis are set as zero (We only have four channels on the manual control inputs)
-
-					// manual rates control - ACRO mode
-					const Vector3f man_torque_sp{manual_control_setpoint.roll, -manual_control_setpoint.pitch, manual_control_setpoint.yaw};
-					///TODO: Define parameter to scale torque
-					const Vector3f torque_setpoint = man_torque_sp * _manual_torque_max;
-
-					_thrust_setpoint(0) = math::constrain((_manual_control_setpoint.pitch * _manual_force_max, -1.f, 1.f));
-					_thrust_setpoint(1) = math::constrain((_manual_control_setpoint.roll * _manual_force_max, -1.f, 1.f));
+					_thrust_setpoint(0) = math::constrain((manual_control_setpoint.pitch * _manual_force_max), -1.f, 1.f);
+					_thrust_setpoint(1) = math::constrain((manual_control_setpoint.roll * _manual_force_max), -1.f, 1.f);
 					_thrust_setpoint(2) = 0.0;
+
+					_torque_setpoint(0) = _torque_setpoint(1) = 0.0;
+					_torque_setpoint(2) = math::constrain((manual_control_setpoint.yaw * _manual_torque_max), -1.f, 1.f);
 					// publish thrust and torque setpoints
 					vehicle_thrust_setpoint_s vehicle_thrust_setpoint{};
 					vehicle_torque_setpoint_s vehicle_torque_setpoint{};
 
 					_thrust_setpoint.copyTo(vehicle_thrust_setpoint.xyz);
-					torque_setpoint.copyTo(vehicle_torque_setpoint.xyz);
+					_torque_setpoint.copyTo(vehicle_torque_setpoint.xyz);
 
 					vehicle_thrust_setpoint.timestamp_sample = angular_velocity.timestamp_sample;
 					vehicle_thrust_setpoint.timestamp = hrt_absolute_time();
-					_vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
 
-					vehicle_torque_setpoint.timestamp_sample = angular_velocity.timestamp_sample;
 					vehicle_torque_setpoint.timestamp = hrt_absolute_time();
+					vehicle_torque_setpoint.timestamp_sample = angular_velocity.timestamp_sample;
+
+					_vehicle_thrust_setpoint_pub.publish(vehicle_thrust_setpoint);
 					_vehicle_torque_setpoint_pub.publish(vehicle_torque_setpoint);
 
 					updateActuatorControlsStatus(vehicle_torque_setpoint, dt);
-
 				}
 			}
 
 		} else if (_vehicle_rates_setpoint_sub.update(&vehicle_rates_setpoint)) {
+			// Get rates from other controllers (e.g. position or attitude controller)
 			if (_vehicle_rates_setpoint_sub.copy(&vehicle_rates_setpoint)) {
 				_rates_setpoint(0) = PX4_ISFINITE(vehicle_rates_setpoint.roll) ? vehicle_rates_setpoint.roll : rates(0);
 				_rates_setpoint(1) = PX4_ISFINITE(vehicle_rates_setpoint.pitch) ? vehicle_rates_setpoint.pitch : rates(1);

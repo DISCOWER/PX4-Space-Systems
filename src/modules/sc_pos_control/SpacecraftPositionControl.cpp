@@ -348,7 +348,8 @@ void SpacecraftPositionControl::poll_manual_setpoint(const float dt,
 			if (!_vehicle_control_mode.flag_control_climb_rate_enabled &&
 			    !_vehicle_control_mode.flag_control_offboard_enabled) {
 
-				if (_vehicle_control_mode.flag_control_attitude_enabled) {
+				if (_vehicle_control_mode.flag_control_attitude_enabled && 
+					_vehicle_control_mode.flag_control_position_enabled) {
 					// We are in Stabilized mode
 					// Generate position setpoints
 					if (!stabilized_pos_sp_initialized) {
@@ -365,9 +366,6 @@ void SpacecraftPositionControl::poll_manual_setpoint(const float dt,
 					Vector3f target_vel_sp = Vector3f(_manual_control_setpoint.pitch, _manual_control_setpoint.roll, 0.0);
 					// TODO(@Pedro-Roque): probably need to move velocity to inertial frame
 					target_pos_sp = target_pos_sp + target_vel_sp * dt;
-					PX4_INFO("Target position: %f %f %f  - My position: %f %f %f\n", (double)target_pos_sp(0), (double)target_pos_sp(1), (double)target_pos_sp(2),
-																				   (double)vehicle_local_position.x, (double)vehicle_local_position.y, (double)vehicle_local_position.z);
-					PX4_INFO("Target velocity: %f %f %f\n", (double)target_vel_sp(0), (double)target_vel_sp(1), (double)target_vel_sp(2));
 					
 					// Update _setpoint
 					_setpoint.position[0] = target_pos_sp(0);
