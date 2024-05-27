@@ -80,8 +80,9 @@ bool PWMSim::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS], un
 				bool is_reversible = reversible_outputs & (1u << i);
 				float output = outputs[i];
 
-				if (((int)function >= (int)OutputFunction::Motor1 && (int)function <= (int)OutputFunction::MotorMax)
-				    && !is_reversible) {
+				if ((((int)function >= (int)OutputFunction::Motor1 && (int)function <= (int)OutputFunction::MotorMax)
+				    && !is_reversible) || 
+					((int)function >= (int)OutputFunction::Thruster1 && (int)function <= (int)OutputFunction::ThrusterMax)) {
 					// Scale non-reversible motors to [0, 1]
 					actuator_outputs.output[i] = (output - PWM_SIM_PWM_MIN_MAGIC) / (PWM_SIM_PWM_MAX_MAGIC - PWM_SIM_PWM_MIN_MAGIC);
 
