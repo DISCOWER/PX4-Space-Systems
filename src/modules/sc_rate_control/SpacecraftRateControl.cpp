@@ -143,13 +143,14 @@ void SpacecraftRateControl::Run()
 		// use rates setpoint topic
 		vehicle_rates_setpoint_s vehicle_rates_setpoint{};
 
-		if (_vehicle_control_mode.flag_control_manual_enabled) {
-			// Here we can be in: Manual Mode, Acro Mode, or Stabilized Mode
+		if (_vehicle_control_mode.flag_control_manual_enabled &&
+			!_vehicle_control_mode.flag_control_attitude_enabled) {
+			// Here we can be in: Manual Mode or Acro Mode
 			// generate the rate setpoint from sticks
 			manual_control_setpoint_s manual_control_setpoint;
 
 			if (_manual_control_setpoint_sub.update(&manual_control_setpoint)) {
-				if (_vehicle_control_mode.flag_control_rates_enabled && !_vehicle_control_mode.flag_control_attitude_enabled) {
+				if (_vehicle_control_mode.flag_control_rates_enabled) {
 					// manual rates control - ACRO mode
 					const Vector3f man_rate_sp{manual_control_setpoint.roll,
 											   -manual_control_setpoint.pitch, 
@@ -168,7 +169,7 @@ void SpacecraftRateControl::Run()
 
 					_vehicle_rates_setpoint_pub.publish(vehicle_rates_setpoint);
 
-				} else if (!_vehicle_control_mode.flag_control_rates_enabled && !_vehicle_control_mode.flag_control_attitude_enabled) {
+				} else if (!_vehicle_control_mode.flag_control_rates_enabled) {
 					// Manual/direct control
 					// Yaw stick commands rotational moment, Roll/Pitch stick commands translational forces
 					// All other axis are set as zero (We only have four channels on the manual control inputs)
@@ -214,10 +215,6 @@ void SpacecraftRateControl::Run()
 			if (!_vehicle_control_mode.flag_armed ||
 			    (_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_ROTARY_WING &&
 				_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_SPACECRAFT)) {
-				PX4_INFO("Resetting integral. RW: %d, SC: %d, TOT Vehicle: %d", _vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_ROTARY_WING,
-					_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_SPACECRAFT, (_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_ROTARY_WING &&
-				_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_SPACECRAFT) );
-				PX4_INFO("TYPE: %d", _vehicle_status.vehicle_type);
 				_rate_control.resetIntegral();
 			}
 

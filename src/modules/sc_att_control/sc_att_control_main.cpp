@@ -245,7 +245,6 @@ SpacecraftAttitudeControl::Run()
 		}
 
 		bool attitude_setpoint_generated = false;
-
 		if (_vehicle_control_mode.flag_control_attitude_enabled) {
 
 			// Generate the attitude setpoint from stick inputs if we are in Manual/Stabilized mode
@@ -253,7 +252,6 @@ SpacecraftAttitudeControl::Run()
 			    !_vehicle_control_mode.flag_control_altitude_enabled &&
 			    !_vehicle_control_mode.flag_control_velocity_enabled &&
 			    !_vehicle_control_mode.flag_control_position_enabled) {
-
 				generate_attitude_setpoint(q, dt, _reset_yaw_sp);
 				attitude_setpoint_generated = true;
 
@@ -271,7 +269,6 @@ SpacecraftAttitudeControl::Run()
 			rates_setpoint.yaw = rates_sp(2);
 			_thrust_setpoint_body.copyTo(rates_setpoint.thrust_body);
 			rates_setpoint.timestamp = hrt_absolute_time();
-
 			_vehicle_rates_setpoint_pub.publish(rates_setpoint);
 		}
 
