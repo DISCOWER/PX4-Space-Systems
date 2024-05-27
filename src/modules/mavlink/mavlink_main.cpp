@@ -194,7 +194,7 @@ Mavlink::mavlink_update_parameters()
 		set_proto_version(proto);
 	}
 
-	if (_param_mav_type.get() < 0 || _param_mav_type.get() >= MAV_TYPE_ENUM_END) {
+	if ((_param_mav_type.get() < 0 || _param_mav_type.get() >= MAV_TYPE_ENUM_END) && _param_mav_type.get() != 99){
 		_param_mav_type.set(0);
 		_param_mav_type.commit_no_notification();
 		PX4_ERR("MAV_TYPE parameter invalid, resetting to 0.");

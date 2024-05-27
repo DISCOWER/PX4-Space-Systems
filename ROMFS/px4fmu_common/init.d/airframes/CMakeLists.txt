@@ -162,6 +162,7 @@ endif()
 if(CONFIG_MODULES_SC_RATE_CONTROL)
 	px4_add_romfs_files(
 		# [70000, 79999] Spacecraft-type platforms
-		70000_kth_space_robot
+		70000_spacecraft_2d
+		70001_spacecraft_dart
 	)
 endif()

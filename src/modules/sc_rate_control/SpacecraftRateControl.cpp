@@ -74,6 +74,9 @@ void SpacecraftRateControl::parameters_updated()
 	// The controller gain K is used to convert the parallel (P + I/s + sD) form
 	// to the ideal (K * [1 + 1/sTi + sTd]) form
 	const Vector3f rate_k = Vector3f(_param_sc_rollrate_k.get(), _param_sc_pitchrate_k.get(), _param_sc_yawrate_k.get());
+	PX4_INFO("Yaw Rate K: %f", (double)_param_sc_yawrate_k.get());
+	PX4_INFO("Yaw Rate I: %f", (double)_param_sc_yawrate_i.get());
+	PX4_INFO("Yaw Rate D: %f", (double)_param_sc_yawrate_d.get());
 
 	_rate_control.setPidGains(
 		rate_k.emult(Vector3f(_param_sc_rollrate_p.get(), _param_sc_pitchrate_p.get(), _param_sc_yawrate_p.get())),
@@ -151,12 +154,11 @@ void SpacecraftRateControl::Run()
 			if (_manual_control_setpoint_sub.update(&manual_control_setpoint)) {
 				if (_vehicle_control_mode.flag_control_rates_enabled && !_vehicle_control_mode.flag_control_attitude_enabled) {
 					// manual rates control - ACRO mode
-					const Vector3f man_rate_sp{
-						math::superexpo(manual_control_setpoint.roll, _param_sc_acro_expo.get(), _param_sc_acro_supexpo.get()),
-						math::superexpo(-manual_control_setpoint.pitch, _param_sc_acro_expo.get(), _param_sc_acro_supexpo.get()),
-						math::superexpo(manual_control_setpoint.yaw, _param_sc_acro_expo_y.get(), _param_sc_acro_supexpoy.get())};
+					const Vector3f man_rate_sp{manual_control_setpoint.roll,
+											   -manual_control_setpoint.pitch, 
+											   manual_control_setpoint.yaw};
 
-					_rates_setpoint = man_rate_sp.emult(_acro_rate_max);
+					_rates_setpoint = man_rate_sp * 5;
 					_thrust_setpoint(2) = -manual_control_setpoint.throttle;
 					_thrust_setpoint(0) = _thrust_setpoint(1) = 0.f;
 
@@ -240,9 +242,12 @@ void SpacecraftRateControl::Run()
 			}
 
 			// run rate controller
-			const Vector3f att_control =
+			const Vector3f torque_sp =
 				_rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
-
+			// PX4_INFO("Rate: %f %f %f", (double)rates(0), (double)rates(1), (double)rates(2));
+			// PX4_INFO("Rate Setpoint: %f %f %f", (double)_rates_setpoint(0), (double)_rates_setpoint(1), (double)_rates_setpoint(2));
+			// PX4_INFO("Torque sp: %f %f %f", (double)torque_sp(0), (double)torque_sp(1), (double)torque_sp(2));
+			
 			// publish rate controller status
 			rate_ctrl_status_s rate_ctrl_status{};
 			_rate_control.getRateControlStatus(rate_ctrl_status);
@@ -254,9 +259,9 @@ void SpacecraftRateControl::Run()
 			vehicle_torque_setpoint_s vehicle_torque_setpoint{};
 
 			_thrust_setpoint.copyTo(vehicle_thrust_setpoint.xyz);
-			vehicle_torque_setpoint.xyz[0] = PX4_ISFINITE(att_control(0)) ? att_control(0) : 0.f;
-			vehicle_torque_setpoint.xyz[1] = PX4_ISFINITE(att_control(1)) ? att_control(1) : 0.f;
-			vehicle_torque_setpoint.xyz[2] = PX4_ISFINITE(att_control(2)) ? att_control(2) : 0.f;
+			vehicle_torque_setpoint.xyz[0] = PX4_ISFINITE(torque_sp(0)) ? torque_sp(0) : 0.f;
+			vehicle_torque_setpoint.xyz[1] = PX4_ISFINITE(torque_sp(1)) ? torque_sp(1) : 0.f;
+			vehicle_torque_setpoint.xyz[2] = PX4_ISFINITE(torque_sp(2)) ? torque_sp(2) : 0.f;
 
 			// scale setpoints by battery status if enabled
 			if (_param_sc_bat_scale_en.get()) {
