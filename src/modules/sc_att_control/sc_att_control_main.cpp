@@ -197,11 +197,6 @@ SpacecraftAttitudeControl::Run()
 
 			if (_vehicle_attitude_setpoint_sub.copy(&vehicle_attitude_setpoint)
 			    && (vehicle_attitude_setpoint.timestamp > _last_attitude_setpoint)) {
-				/* Removing print
-				PX4_INFO("Current setpoint: %f %f %f %f", (double)vehicle_attitude_setpoint.q_d[0],
-				(double)vehicle_attitude_setpoint.q_d[1], (double)vehicle_attitude_setpoint.q_d[2],
-				(double)vehicle_attitude_setpoint.q_d[3]);*/
-
 				_attitude_control.setAttitudeSetpoint(Quatf(vehicle_attitude_setpoint.q_d));
 				_thrust_setpoint_body = Vector3f(vehicle_attitude_setpoint.thrust_body);
 				_last_attitude_setpoint = vehicle_attitude_setpoint.timestamp;
@@ -247,14 +242,13 @@ SpacecraftAttitudeControl::Run()
 		bool attitude_setpoint_generated = false;
 		if (_vehicle_control_mode.flag_control_attitude_enabled) {
 
-			// Generate the attitude setpoint from stick inputs if we are in Manual/Stabilized mode
+			// Generate the attitude setpoint from stick inputs if we are in Stabilized mode
 			if (_vehicle_control_mode.flag_control_manual_enabled &&
 			    !_vehicle_control_mode.flag_control_altitude_enabled &&
 			    !_vehicle_control_mode.flag_control_velocity_enabled &&
 			    !_vehicle_control_mode.flag_control_position_enabled) {
 				generate_attitude_setpoint(q, dt, _reset_yaw_sp);
 				attitude_setpoint_generated = true;
-
 			} else {
 				_man_roll_input_filter.reset(0.f);
 				_man_pitch_input_filter.reset(0.f);
