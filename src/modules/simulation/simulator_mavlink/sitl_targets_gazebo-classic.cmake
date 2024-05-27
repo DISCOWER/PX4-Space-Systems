@@ -89,7 +89,7 @@ if(gazebo_FOUND)
 		iris_vision
 		omnicopter
 		2d_spacecraft
-		3d_spacecraft
+		spacecraft_dart
 		plane
 		plane_cam
 		plane_catapult

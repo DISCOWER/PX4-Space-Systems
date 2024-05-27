@@ -165,9 +165,11 @@ void ScPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitud
 		vehicle_attitude_s &v_att) const
 {
 	// Set thrust setpoint
-	attitude_setpoint.thrust_body[0] = _thr_sp(0);
-	attitude_setpoint.thrust_body[1] = _thr_sp(1);
-	attitude_setpoint.thrust_body[2] = _thr_sp(2);
+	const Dcmf R_to_body(Quatf(v_att.q).inversed());
+	matrix::Vector3f b_thr_sp = R_to_body * _thr_sp;
+	attitude_setpoint.thrust_body[0] = b_thr_sp(0);
+	attitude_setpoint.thrust_body[1] = b_thr_sp(1);
+	attitude_setpoint.thrust_body[2] = b_thr_sp(2);
 
 	// Bypass attitude control by giving same attitude setpoint to att control
 	if (PX4_ISFINITE(_quat_sp(0)) && PX4_ISFINITE(_quat_sp(1)) && PX4_ISFINITE(_quat_sp(2)) && PX4_ISFINITE(_quat_sp(3))) {
