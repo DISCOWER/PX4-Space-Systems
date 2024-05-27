@@ -74,9 +74,6 @@ void SpacecraftRateControl::parameters_updated()
 	// The controller gain K is used to convert the parallel (P + I/s + sD) form
 	// to the ideal (K * [1 + 1/sTi + sTd]) form
 	const Vector3f rate_k = Vector3f(_param_sc_rollrate_k.get(), _param_sc_pitchrate_k.get(), _param_sc_yawrate_k.get());
-	PX4_INFO("Yaw Rate K: %f", (double)_param_sc_yawrate_k.get());
-	PX4_INFO("Yaw Rate I: %f", (double)_param_sc_yawrate_i.get());
-	PX4_INFO("Yaw Rate D: %f", (double)_param_sc_yawrate_d.get());
 
 	_rate_control.setPidGains(
 		rate_k.emult(Vector3f(_param_sc_rollrate_p.get(), _param_sc_pitchrate_p.get(), _param_sc_yawrate_p.get())),
@@ -215,7 +212,12 @@ void SpacecraftRateControl::Run()
 		if (_vehicle_control_mode.flag_control_rates_enabled) {
 			// reset integral if disarmed
 			if (!_vehicle_control_mode.flag_armed ||
-			    _vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_ROTARY_WING) {
+			    (_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_ROTARY_WING &&
+				_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_SPACECRAFT)) {
+				PX4_INFO("Resetting integral. RW: %d, SC: %d, TOT Vehicle: %d", _vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_ROTARY_WING,
+					_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_SPACECRAFT, (_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_ROTARY_WING &&
+				_vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_SPACECRAFT) );
+				PX4_INFO("TYPE: %d", _vehicle_status.vehicle_type);
 				_rate_control.resetIntegral();
 			}
 
@@ -238,12 +240,12 @@ void SpacecraftRateControl::Run()
 				}
 
 				// TODO: send the unallocated value directly for better anti-windup
-				_rate_control.setSaturationStatus(saturation_positive, saturation_negative);
+				// _rate_control.setSaturationStatus(saturation_positive, saturation_negative);
 			}
 
 			// run rate controller
 			const Vector3f torque_sp =
-				_rate_control.update(rates, _rates_setpoint, angular_accel, dt, _maybe_landed || _landed);
+				_rate_control.update(rates, _rates_setpoint, angular_accel, dt, false);
 			// PX4_INFO("Rate: %f %f %f", (double)rates(0), (double)rates(1), (double)rates(2));
 			// PX4_INFO("Rate Setpoint: %f %f %f", (double)_rates_setpoint(0), (double)_rates_setpoint(1), (double)_rates_setpoint(2));
 			// PX4_INFO("Torque sp: %f %f %f", (double)torque_sp(0), (double)torque_sp(1), (double)torque_sp(2));
