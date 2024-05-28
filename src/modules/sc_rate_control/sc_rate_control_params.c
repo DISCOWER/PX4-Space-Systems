@@ -206,12 +206,12 @@ PARAM_DEFINE_FLOAT(SC_PITCHRATE_K, 1.0f);
  * Yaw rate proportional gain, i.e. control output for angular speed error 1 rad/s.
  *
  * @min 0.0
- * @max 0.6
+ * @max 10.0
  * @decimal 2
  * @increment 0.01
  * @group Multicopter Rate Control
  */
-PARAM_DEFINE_FLOAT(SC_YAWRATE_P, 0.2f);
+PARAM_DEFINE_FLOAT(SC_YAWRATE_P, 10.0f);
 
 /**
  * Yaw rate I gain
@@ -223,7 +223,7 @@ PARAM_DEFINE_FLOAT(SC_YAWRATE_P, 0.2f);
  * @increment 0.01
  * @group Multicopter Rate Control
  */
-PARAM_DEFINE_FLOAT(SC_YAWRATE_I, 0.1f);
+PARAM_DEFINE_FLOAT(SC_YAWRATE_I, 0.865f);
 
 /**
  * Yaw rate integrator limit
@@ -235,7 +235,7 @@ PARAM_DEFINE_FLOAT(SC_YAWRATE_I, 0.1f);
  * @increment 0.01
  * @group Multicopter Rate Control
  */
-PARAM_DEFINE_FLOAT(SC_YR_INT_LIM, 0.30f);
+PARAM_DEFINE_FLOAT(SC_YR_INT_LIM, 0.2f);
 
 /**
  * Yaw rate D gain
