@@ -110,7 +110,8 @@ param set PWM_SIM_PWM_MAX 10000
 param set PWM_SIM_PWM_MIN 0
 
 # Controller Tunings
-param set-default SC_YAWRATE_P 3.335
-param set-default SC_YAWRATE_I 0.87
-param set-default SC_YAWRATE_D 0.15
-param set-default SC_YR_INT_LIM 0.2
+param set SC_YAWRATE_P 3.335
+param set SC_YAWRATE_I 0.87
+param set SC_YAWRATE_D 0.15
+param set SC_YR_INT_LIM 0.2
+param set SC_YAW_P 3.0
