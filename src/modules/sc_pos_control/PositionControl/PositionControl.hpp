@@ -78,9 +78,17 @@ public:
 	/**
 	 * Set the position control gains
 	 * @param P 3D vector of proportional gains for x,y,z axis
+	 * @param I 3D vector of integral gains for x,y,z axis
 	 */
-	void setPositionGains(const matrix::Vector3f &P) { _gain_pos_p = P; }
+	void setPositionGains(const matrix::Vector3f &P, const matrix::Vector3f &I);
 
+	/**
+	 * @brief Set the Position Integral Limits object
+	 * 
+	 * @param lim float limit to be set (on all axis)
+	 */
+	void setPositionIntegralLimits(const float lim);
+	
 	/**
 	 * Set the velocity control gains
 	 * @param P 3D vector of proportional gains for x,y,z axis
@@ -94,6 +102,13 @@ public:
 	 * @param vel_limit velocity limit
 	 */
 	void setVelocityLimits(const float vel_limit);
+
+	/**
+	 * @brief Set the Velocity Integral Limits object
+	 * 
+	 * @param lim float limit to be set (on all axis)
+	 */
+	void setVelocityIntegralLimits(const float lim);
 
 	/**
 	 * Set the minimum and maximum collective normalized thrust [0,1] that can be output by the controller
@@ -130,9 +145,12 @@ public:
 	 * Set the integral term in xy to 0.
 	 * @see _vel_int
 	 */
-	void resetIntegral() { _vel_int.setZero(); }
+	void resetIntegral() {
+          _pos_int.setZero();
+          _vel_int.setZero();
+    }
 
-	/**
+        /**
 	 * Get the controllers output attitude setpoint
 	 * This attitude setpoint was generated from the resulting acceleration setpoint after position and velocity control.
 	 * It needs to be executed by the attitude controller to achieve velocity and position tracking.
@@ -152,11 +170,12 @@ private:
 
 	bool _inputValid();
 
-	void _positionControl(); ///< Position proportional control
+	void _positionControl(const float dt); ///< Position PI control
 	void _velocityControl(const float dt); ///< Velocity PID control
 
 	// Gains
 	matrix::Vector3f _gain_pos_p; ///< Position control proportional gain
+	matrix::Vector3f _gain_pos_i; ///< Position control integral gain
 	matrix::Vector3f _gain_vel_p; ///< Velocity control proportional gain
 	matrix::Vector3f _gain_vel_i; ///< Velocity control integral gain
 	matrix::Vector3f _gain_vel_d; ///< Velocity control derivative gain
@@ -165,9 +184,12 @@ private:
 	float _lim_vel{}; ///< Horizontal velocity limit with feed forward and position control
 	float _lim_thr_min{}; ///< Minimum collective thrust allowed as output [-1,0] e.g. -0.9
 	float _lim_thr_max{}; ///< Maximum collective thrust allowed as output [-1,0] e.g. -0.1
+    float _pos_int_lim{}; ///< Anti-windup for position control
+	float _vel_int_lim{}; ///< Anti-windup for velocity control
 
-	// States
+        // States
 	matrix::Vector3f _pos; /**< current position */
+	matrix::Vector3f _pos_int; /**< integral term of the position controller */
 	matrix::Vector3f _vel; /**< current velocity */
 	matrix::Vector3f _vel_dot; /**< velocity derivative (replacement for acceleration estimate) */
 	matrix::Vector3f _vel_int; /**< integral term of the velocity controller */

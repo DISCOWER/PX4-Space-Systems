@@ -115,3 +115,9 @@ param set SC_YAWRATE_I 0.87
 param set SC_YAWRATE_D 0.15
 param set SC_YR_INT_LIM 0.2
 param set SC_YAW_P 3.0
+
+param set SPC_POS_P 0.20
+param set SPC_VEL_P 6.55
+param set SPC_VEL_I 0.0
+param set SPC_VEL_D 0.0
+param set SPC_VEL_MAX 12.0

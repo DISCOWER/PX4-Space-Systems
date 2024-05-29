@@ -54,6 +54,22 @@ void ScPositionControl::setVelocityGains(const Vector3f &P, const Vector3f &I, c
 	_gain_vel_d = D;
 }
 
+void ScPositionControl::setPositionGains(const Vector3f &P, const Vector3f &I)
+{
+	_gain_pos_p = P;
+	_gain_pos_i = I;
+}
+
+void ScPositionControl::setPositionIntegralLimits(const float lim)
+{
+	_pos_int_lim = lim;
+}
+
+void ScPositionControl::setVelocityIntegralLimits(const float lim)
+{
+	_vel_int_lim = lim;
+}
+
 void ScPositionControl::setVelocityLimits(const float vel_limit)
 {
 	_lim_vel = vel_limit;
@@ -85,7 +101,7 @@ bool ScPositionControl::update(const float dt)
 	bool valid = _inputValid();
 
 	if (valid) {
-		_positionControl();
+		_positionControl(dt);
 		_velocityControl(dt);
 	}
 
@@ -93,10 +109,21 @@ bool ScPositionControl::update(const float dt)
 	return valid && _acc_sp.isAllFinite() && _thr_sp.isAllFinite();
 }
 
-void ScPositionControl::_positionControl()
+void ScPositionControl::_positionControl(const float dt)
 {
-	// P-position controller
-	Vector3f vel_sp_position = (_pos_sp - _pos).emult(_gain_pos_p);
+	// Constrain vertical velocity integral
+	_pos_int(0) = math::constrain(_vel_int(0), -_pos_int_lim, _pos_int_lim);
+	_pos_int(1) = math::constrain(_vel_int(1), -_pos_int_lim, _pos_int_lim);
+	_pos_int(2) = math::constrain(_vel_int(2), -_pos_int_lim, _pos_int_lim);
+
+        // P-position controller
+	ControlMath::setZeroIfNanVector3f(_pos_sp);
+	Vector3f pos_error = _pos_sp - _pos;
+	Vector3f vel_sp_position = pos_error.emult(_gain_pos_p) + _pos_int;
+
+	// Update integral part of position control
+	_vel_int += pos_error.emult(_gain_pos_i) * dt;
+
 	// Position and feed-forward velocity setpoints or position states being NAN results in them not having an influence
 	ControlMath::addIfNotNanVector3f(_vel_sp, vel_sp_position);
 	// make sure there are no NAN elements for further reference while constraining
@@ -106,12 +133,18 @@ void ScPositionControl::_positionControl()
 	_vel_sp(0) = math::constrain(_vel_sp(0), -_lim_vel, _lim_vel);
 	_vel_sp(1) = math::constrain(_vel_sp(1), -_lim_vel, _lim_vel);
 	_vel_sp(2) = math::constrain(_vel_sp(2), -_lim_vel, _lim_vel);
+
 }
 
 void ScPositionControl::_velocityControl(const float dt)
 {
 	// Constrain vertical velocity integral
-	_vel_int(2) = math::constrain(_vel_int(2), -CONSTANTS_ONE_G, CONSTANTS_ONE_G);
+	// _vel_int(2) = math::constrain(_vel_int(2), -CONSTANTS_ONE_G, CONSTANTS_ONE_G);
+	// Constrain vertical velocity integral
+	_vel_int(0) = math::constrain(_vel_int(0), -_vel_int_lim, _vel_int_lim);
+	_vel_int(1) = math::constrain(_vel_int(1), -_vel_int_lim, _vel_int_lim);
+	_vel_int(2) = math::constrain(_vel_int(2), -_vel_int_lim, _vel_int_lim);
+
 
 	// PID velocity control
 	Vector3f vel_error = _vel_sp - _vel;

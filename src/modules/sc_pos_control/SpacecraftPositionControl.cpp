@@ -112,12 +112,17 @@ void SpacecraftPositionControl::parameters_update(bool force)
 		if (num_changed > 0) {
 			param_notify_changes();
 		}
-
-		_control.setPositionGains(Vector3f(_param_mpc_pos_p.get(), _param_mpc_pos_p.get(), _param_mpc_pos_p.get()));
+		
+		// Set PI and PID gains, as well as anti-windup limits
+		_control.setPositionGains(
+			Vector3f(_param_mpc_pos_p.get(), _param_mpc_pos_p.get(), _param_mpc_pos_p.get()),
+			Vector3f(_param_mpc_pos_i.get(), _param_mpc_pos_i.get(), _param_mpc_pos_i.get()));
+		_control.setPositionIntegralLimits(_param_mpc_pos_i_lim.get());
 		_control.setVelocityGains(
 			Vector3f(_param_mpc_vel_p_acc.get(), _param_mpc_vel_p_acc.get(), _param_mpc_vel_p_acc.get()),
 			Vector3f(_param_mpc_vel_i_acc.get(), _param_mpc_vel_i_acc.get(), _param_mpc_vel_i_acc.get()),
 			Vector3f(_param_mpc_vel_d_acc.get(), _param_mpc_vel_d_acc.get(), _param_mpc_vel_d_acc.get()));
+		_control.setVelocityIntegralLimits(_param_mpc_vel_i_lim.get());
 
 		// Check that the design parameters are inside the absolute maximum constraints
 		if (_param_mpc_vel_cruise.get() > _param_mpc_vel_max.get()) {
@@ -316,14 +321,8 @@ void SpacecraftPositionControl::Run()
 			_control.setVelocityLimits(_param_mpc_vel_max.get());
 
 			_control.setInputSetpoint(_setpoint);
-			PX4_INFO("Setpoint: %f %f %f / %f %f %f", (double)_setpoint.position[0], (double)_setpoint.position[1],
-				 (double)_setpoint.position[2], (double)_setpoint.velocity[0], (double)_setpoint.velocity[1],
-				 (double)_setpoint.velocity[2]);
 
 			_control.setState(states);
-			PX4_INFO("States: %f %f %f / %f %f %f", (double)states.position(0), (double)states.position(1),
-				 (double)states.position(2), (double)states.velocity(0), (double)states.velocity(1),
-				 (double)states.velocity(2));
 
 			// Run position control
 			if (!_control.update(dt)) {
@@ -336,16 +335,47 @@ void SpacecraftPositionControl::Run()
 			// Publish attitude setpoint output
 			vehicle_attitude_setpoint_s attitude_setpoint{};
 			_control.getAttitudeSetpoint(attitude_setpoint, v_att);
-			PX4_INFO("Control input: %f %f %f / %f %f %f %f", (double)attitude_setpoint.thrust_body[0], (double)attitude_setpoint.thrust_body[1],
-				(double)attitude_setpoint.thrust_body[2], (double)attitude_setpoint.q_d[0], (double)attitude_setpoint.q_d[1],
-				(double)attitude_setpoint.q_d[2], (double)attitude_setpoint.q_d[3]);
+			// PX4_INFO("States: %f %f %f / %f %f %f", (double)states.position(0), (double)states.position(1),
+			// 	 (double)states.position(2), (double)states.velocity(0), (double)states.velocity(1),
+			// 	 (double)states.velocity(2));
+			// PX4_INFO("Setpoint: %f %f %f / %f %f %f", (double)_setpoint.position[0], (double)_setpoint.position[1],
+			// 	 (double)_setpoint.position[2], (double)_setpoint.velocity[0], (double)_setpoint.velocity[1],
+			// 	 (double)_setpoint.velocity[2]);
+			// PX4_INFO("Control input: %f %f %f / %f %f %f %f", (double)attitude_setpoint.thrust_body[0], (double)attitude_setpoint.thrust_body[1],
+			// 	(double)attitude_setpoint.thrust_body[2], (double)attitude_setpoint.q_d[0], (double)attitude_setpoint.q_d[1],
+			// 	(double)attitude_setpoint.q_d[2], (double)attitude_setpoint.q_d[3]);
 			attitude_setpoint.timestamp = hrt_absolute_time();
 			_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
 
+			// publish setpoint
+			publishLocalPositionSetpoint(attitude_setpoint);
 		}
 	}
 
 	perf_end(_cycle_perf);
+}
+
+void SpacecraftPositionControl::publishLocalPositionSetpoint(vehicle_attitude_setpoint_s &_att_sp)
+{
+	// complete the setpoint data structure
+	vehicle_local_position_setpoint_s local_position_setpoint{};
+	local_position_setpoint.timestamp = hrt_absolute_time();
+
+	local_position_setpoint.x = _setpoint.position[0];
+	local_position_setpoint.y = _setpoint.position[1];
+	local_position_setpoint.z = _setpoint.position[2];
+	local_position_setpoint.yaw = NAN;
+	local_position_setpoint.yawspeed = NAN;
+	local_position_setpoint.vx = _setpoint.velocity[0];
+	local_position_setpoint.vy = _setpoint.velocity[1];
+	local_position_setpoint.vz = _setpoint.velocity[2];
+	local_position_setpoint.acceleration[0] = _setpoint.acceleration[0];
+	local_position_setpoint.acceleration[1] = _setpoint.acceleration[1];
+	local_position_setpoint.acceleration[2] = _setpoint.acceleration[2];
+	local_position_setpoint.thrust[0] = _att_sp.thrust_body[0];
+	local_position_setpoint.thrust[1] = _att_sp.thrust_body[1];
+	local_position_setpoint.thrust[2] = _att_sp.thrust_body[2];
+	_local_pos_sp_pub.publish(local_position_setpoint);
 }
 
 void SpacecraftPositionControl::poll_manual_setpoint(const float dt,

@@ -42,46 +42,85 @@
  * @increment 0.1
  * @group Spacecraft Position Control
  */
-PARAM_DEFINE_FLOAT(SPC_POS_P, 0.95f);
+PARAM_DEFINE_FLOAT(SPC_POS_P, 0.2f);
+
+/**
+ * Integral gain for position error
+ *
+ * Defined as corrective velocity in m/s per m velocity error
+ *
+ * @min 0
+ * @max 15
+ * @decimal 2
+ * @increment 0.1
+ * @group Spacecraft Position Control
+ */
+PARAM_DEFINE_FLOAT(SPC_POS_I, 0.f);
+
+/**
+ * Integral limit for position error
+ *
+ * Defined as corrective velocity in m/s per m velocity error
+ *
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.01
+ * @group Spacecraft Position Control
+ */
+PARAM_DEFINE_FLOAT(SPC_POS_I_LIM, 1.f);
 
 /**
  * Proportional gain for velocity error
  *
  * Defined as corrective acceleration in m/s^2 per m/s velocity error
  *
- * @min 2
+ * @min 0
  * @max 15
  * @decimal 2
  * @increment 0.1
  * @group Spacecraft Position Control
  */
-PARAM_DEFINE_FLOAT(SPC_VEL_P, 4.f);
+PARAM_DEFINE_FLOAT(SPC_VEL_P, 6.55f);
 
 /**
  * Integral gain for velocity error
  *
  * Defined as corrective acceleration in m/s^2 per m/s velocity error
  *
- * @min 2
+ * @min 0
  * @max 15
  * @decimal 2
  * @increment 0.1
  * @group Spacecraft Position Control
  */
-PARAM_DEFINE_FLOAT(SPC_VEL_I, 4.f);
+PARAM_DEFINE_FLOAT(SPC_VEL_I, 0.f);
+
+/**
+ * Integral limit for velocity error
+ *
+ * Defined as corrective acceleration in m/s^2 per m/s velocity error
+ *
+ * @min 0
+ * @max 5
+ * @decimal 2
+ * @increment 0.1
+ * @group Spacecraft Position Control
+ */
+PARAM_DEFINE_FLOAT(SPC_VEL_I_LIM, 1.f);
 
 /**
  * Derivative gain for velocity error
  *
  * Defined as corrective acceleration in m/s^2 per m/s velocity error
  *
- * @min 2
+ * @min 0.0
  * @max 15
  * @decimal 2
  * @increment 0.1
  * @group Spacecraft Position Control
  */
-PARAM_DEFINE_FLOAT(SPC_VEL_D, 4.f);
+PARAM_DEFINE_FLOAT(SPC_VEL_D, 0.0f);
 
 /**
  * Maximum velocity

@@ -112,8 +112,11 @@ private:
 	DEFINE_PARAMETERS(
 		// Position Control
 		(ParamFloat<px4::params::SPC_POS_P>)        _param_mpc_pos_p,
+		(ParamFloat<px4::params::SPC_POS_I>)        _param_mpc_pos_i,
+		(ParamFloat<px4::params::SPC_POS_I_LIM>)    _param_mpc_pos_i_lim,
 		(ParamFloat<px4::params::SPC_VEL_P>) 		_param_mpc_vel_p_acc,
 		(ParamFloat<px4::params::SPC_VEL_I>) 		_param_mpc_vel_i_acc,
+		(ParamFloat<px4::params::SPC_VEL_I_LIM>)    _param_mpc_vel_i_lim,
 		(ParamFloat<px4::params::SPC_VEL_D>) 		_param_mpc_vel_d_acc,
 		(ParamFloat<px4::params::SPC_VEL_ALL>)   	_param_mpc_vel_all,
 		(ParamFloat<px4::params::SPC_VEL_MAX>)   	_param_mpc_vel_max,
@@ -177,6 +180,12 @@ private:
 				  &vehicle_local_position, const vehicle_attitude_s &_vehicle_att);
 
 	/**
+	 * @brief publishes target setpoint.
+	 * 
+	 */
+    void publishLocalPositionSetpoint(vehicle_attitude_setpoint_s &_att_sp);
+
+        /**
 	 * Generate setpoint to bridge no executable setpoint being available.
 	 * Used to handle transitions where no proper setpoint was generated yet and when the received setpoint is invalid.
 	 * This should only happen briefly when transitioning and never during mode operation or by design.
