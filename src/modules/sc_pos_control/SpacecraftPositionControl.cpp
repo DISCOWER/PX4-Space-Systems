@@ -329,7 +329,6 @@ void SpacecraftPositionControl::Run()
 				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, true));
 				_control.setVelocityLimits(_param_mpc_vel_max.get());
 				_control.update(dt);
-				PX4_INFO("Control failed");
 			}
 
 			// Publish attitude setpoint output
