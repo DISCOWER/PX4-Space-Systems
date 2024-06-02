@@ -334,15 +334,6 @@ void SpacecraftPositionControl::Run()
 			// Publish attitude setpoint output
 			vehicle_attitude_setpoint_s attitude_setpoint{};
 			_control.getAttitudeSetpoint(attitude_setpoint, v_att);
-			// PX4_INFO("States: %f %f %f / %f %f %f", (double)states.position(0), (double)states.position(1),
-			// 	 (double)states.position(2), (double)states.velocity(0), (double)states.velocity(1),
-			// 	 (double)states.velocity(2));
-			// PX4_INFO("Setpoint: %f %f %f / %f %f %f", (double)_setpoint.position[0], (double)_setpoint.position[1],
-			// 	 (double)_setpoint.position[2], (double)_setpoint.velocity[0], (double)_setpoint.velocity[1],
-			// 	 (double)_setpoint.velocity[2]);
-			// PX4_INFO("Control input: %f %f %f / %f %f %f %f", (double)attitude_setpoint.thrust_body[0], (double)attitude_setpoint.thrust_body[1],
-			// 	(double)attitude_setpoint.thrust_body[2], (double)attitude_setpoint.q_d[0], (double)attitude_setpoint.q_d[1],
-			// 	(double)attitude_setpoint.q_d[2], (double)attitude_setpoint.q_d[3]);
 			attitude_setpoint.timestamp = hrt_absolute_time();
 			_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
 
