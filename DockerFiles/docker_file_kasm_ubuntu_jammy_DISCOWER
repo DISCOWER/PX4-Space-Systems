@@ -84,12 +84,10 @@ RUN . /opt/ros/humble/setup.sh && echo ${AMENT_PREFIX_PATH}
 
 #RUN mkdir microros_ws && cd microros_ws
 #RUN git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
-#RUN apt update && sudo rosdep init && rosdep update && rosdep install --from-paths src --ignore-src -y
-#RUN source /opt/ros/humble/setup.bash
 #RUN colcon build
 
-#RUN echo "source /home/kasm-user/microros/install/local_setup.bash" >> /home/kasm-user/.bashrc
-#RUN source /home/kasm-user/microros/install/local_setup.bash
+#RUN echo "source /home/kasm-user/microros_ws/install/local_setup.bash" >> /home/kasm-user/.bashrc
+#RUN source /home/kasm-user/microros_ws/install/local_setup.bash
 
 # Create firmware
 #RUN ros2 run micro_ros_setup create_firmware_ws.sh host
@@ -107,7 +105,6 @@ RUN . /opt/ros/humble/setup.sh && echo ${AMENT_PREFIX_PATH}
 # https://gazebosim.org/docs/garden/install_ubuntu_src
 
 #RUN echo 'export PATH="/home/kasm-user/.local/bin:${PATH}"' >> /home/kasm-user/.bashrc
-#RUN pip install vcstool
 
 #RUN mkdir -p ~/gazebo_ws/src && cd ~/gazebo_ws/src
 #RUN wget https://raw.githubusercontent.com/gazebo-tooling/gazebodistro/master/collection-garden.yaml
@@ -119,8 +116,6 @@ RUN . /opt/ros/humble/setup.sh && echo ${AMENT_PREFIX_PATH}
 
 #RUN sudo apt -y install $(sort -u $(find . -iname 'packages-'`lsb_release -cs`'.apt' -o -iname 'packages.apt' | grep -v '/\.git/') | sed '/gz\|sdf/d' | tr '\n' ' ')
 
-# output of transformer is probability distributio nfrom which you can sample
-# frenet frames
 
 ##################
 # DISCOWER stuff #
@@ -132,7 +127,10 @@ RUN . /opt/ros/humble/setup.sh && echo ${AMENT_PREFIX_PATH}
 #RUN cd ~/gazebo_ws/src
 #RUN rm -rf gz-sim && git clone https://github.com/DISCOWER/gz-sim.git
 #RUN cd ~/gazebo_ws/src/gz-sim && git pull && git checkout origin/pr-spacecraft-thrusters
-#RUN cd ~/gazebo_ws && colcon build --merge-install && . ~/gazebo_ws/install/setup.bash
+#RUN cd ~/gazebo_ws && colcon build --merge-install 
+
+#RUN echo "source /home/kasm-user/gazebo_ws/install/setup.bash" >> /home/kasm-user/.bashrc
+#RUN source /home/kasm-user/gazebo_ws/install/setup.bash
 
 ### PX4-SPACE-SYSTEMS
 #RUN mkdir ~/discower_gits && cd ~/discower_gits
