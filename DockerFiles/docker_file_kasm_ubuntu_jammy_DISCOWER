@@ -1,0 +1,163 @@
+FROM kasmweb/ubuntu-jammy-desktop:1.14.0-rolling
+USER root
+
+#RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+#SHELL ["/bin/bash", "-c"]
+
+ENV HOME /home/kasm-default-profile
+ENV STARTUPDIR /dockerstartup
+ENV INST_SCRIPTS $STARTUPDIR/install
+WORKDIR $HOME
+
+######### Customize Container Here ###########
+
+
+
+ARG KUH=/home/kasm-user
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y libomp5 && \
+    apt-get install -y sudo zsh && \
+    rm -rf /var/lib/apt/list/* && \
+    echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    true
+    
+# Cleaning up junk
+#RUN apt-get purge -y thunderbird* && \
+#    apt-get remove -y google-chrome-stable gimp zoom signal-desktop obs-studio onlyoffice-desktopeditors sublime-text && \
+#    apt-get autoremove -y && \
+#    apt-get clean
+    
+#RUN rm -f /home/kasm-user/Desktop/com.obsproject.Studio.desktop && \
+#    rm -f /home/kasm-user/Desktop/gimp.desktop && \
+#    rm -f /home/kasm-user/Desktop/google-chrome.desktop && \
+#    rm -f /home/kasm-user/Desktop/nextcloud.desktop && \
+#    rm -f /home/kasm-user/Desktop/onlyoffice-desktopeditors.desktop && \
+#    rm -f /home/kasm-user/Desktop/signal-desktop.desktop && \
+#    rm -f /home/kasm-user/Desktop/sublime_text.desktop && \
+#    rm -f /home/kasm-user/Desktop/telegram.desktop && \
+#    rm -f /home/kasm-user/Desktop/Zoom.desktop && \
+#    rm -f /home/kasm-user/Desktop/thunderbird.desktop                        
+
+# Installing utilities
+RUN apt-get update
+RUN apt-get install -y terminator gedit
+
+
+
+#########
+# ROS 2 #
+#########
+# https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+ENV ROS_DISTRO humble
+ENV ROS_PYTHON_VERSION 3
+
+RUN add-apt-repository universe
+RUN apt-get update && apt install -y curl
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+RUN apt-get update && apt-get install -y \
+	software-properties-common \
+	build-essential \
+	python3-colcon-common-extensions \
+	python3-rosdep \
+	python3-vcstool \
+	&& rm -rf /var/lib/apt/lists*
+RUN rosdep init && rosdep update --rosdistro $ROS_DISTRO
+
+RUN apt-get update && apt-get install -y ros-humble-desktop
+   
+RUN echo "source /opt/ros/humble/setup.bash" >> /home/kasm-user/.bashrc
+
+#RUN /bin/bash -c "source /opt/ros/humble/setup.bash && echo 'ROS2 IS SET UP'"
+RUN . /opt/ros/humble/setup.sh && echo ${AMENT_PREFIX_PATH}
+
+
+#############
+# Micro-ROS #
+#############
+# https://micro.ros.org/docs/tutorials/core/first_application_linux/
+
+#RUN pip install -U rosdep colcon-common-extensions
+
+#RUN mkdir microros_ws && cd microros_ws
+#RUN git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git src/micro_ros_setup
+#RUN apt update && sudo rosdep init && rosdep update && rosdep install --from-paths src --ignore-src -y
+#RUN source /opt/ros/humble/setup.bash
+#RUN colcon build
+
+#RUN echo "source /home/kasm-user/microros/install/local_setup.bash" >> /home/kasm-user/.bashrc
+#RUN source /home/kasm-user/microros/install/local_setup.bash
+
+# Create firmware
+#RUN ros2 run micro_ros_setup create_firmware_ws.sh host
+#RUN ros2 run micro_ros_setup build_firmware.sh
+
+# Create mciro-ROS agent
+#RUN ros2 run micro_ros_setup create_agent_ws.sh
+#RUN ros2 run micro_ros_setup build_agent.sh
+
+
+
+#################
+# Gazebo Garden #
+#################
+# https://gazebosim.org/docs/garden/install_ubuntu_src
+
+#RUN echo 'export PATH="/home/kasm-user/.local/bin:${PATH}"' >> /home/kasm-user/.bashrc
+#RUN pip install vcstool
+
+#RUN mkdir -p ~/gazebo_ws/src && cd ~/gazebo_ws/src
+#RUN wget https://raw.githubusercontent.com/gazebo-tooling/gazebodistro/master/collection-garden.yaml
+#RUN vcs import < collection-garden.yaml
+
+#RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+#RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+#RUN apt-get update
+
+#RUN sudo apt -y install $(sort -u $(find . -iname 'packages-'`lsb_release -cs`'.apt' -o -iname 'packages.apt' | grep -v '/\.git/') | sed '/gz\|sdf/d' | tr '\n' ' ')
+
+# output of transformer is probability distributio nfrom which you can sample
+# frenet frames
+
+##################
+# DISCOWER stuff #
+##################
+### CUSTOM GZ-SIM
+#RUN pip install kconfiglib symforce pyros-genmsg future
+
+# We replace gz-sim with our DISCOWER version (for spacecraft)
+#RUN cd ~/gazebo_ws/src
+#RUN rm -rf gz-sim && git clone https://github.com/DISCOWER/gz-sim.git
+#RUN cd ~/gazebo_ws/src/gz-sim && git pull && git checkout origin/pr-spacecraft-thrusters
+#RUN cd ~/gazebo_ws && colcon build --merge-install && . ~/gazebo_ws/install/setup.bash
+
+### PX4-SPACE-SYSTEMS
+#RUN mkdir ~/discower_gits && cd ~/discower_gits
+#RUN git clone https://github.com/DISCOWER/PX4-Space-Systems.git
+
+### PX4_MSGS
+#RUN mkdir -p ~/ff_ws/src && cd ~/ff_ws/src
+#RUN git clone https://github.com/DISCOWER/px4_msgs.git
+#RUN cd ~/ff_ws && colcon build
+
+#RUN echo "source /home/kasm-user/ff_ws/install/setup.bash" >> /home/kasm-user/.bashrc
+
+# GPU enabling:
+# https://bugs.launchpad.net/ubuntu/+source/nvidia-prime/+bug/1948362
+# RUN sudo apt install initramfs-tools && sudo prime-select nvidia
+
+
+
+######### End Customizations ###########
+
+RUN chown 1000:0 $HOME
+RUN $STARTUPDIR/set_user_permission.sh $HOME
+ENV HOME /home/kasm-user
+WORKDIR $HOME
+RUN mkdir -p $HOME && chown -R 1000:0 $HOME
+USER 1000
+
+CMD ["bash"]
