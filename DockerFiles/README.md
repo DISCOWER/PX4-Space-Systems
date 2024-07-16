@@ -42,10 +42,10 @@ FOR NOW, run all the docker commands in `docker_file_kasm_ubuntu_jammy_DISCOWER`
 `cd ~/discower_gits/PX4-Space-Systems`
 `make px4_sitl gz_spacecraft_2d`
 
-## Run micro-ROS 
+## Run micro-ROS
 
-`ros2 run micro_ros_agent micro_ros_agent upd4 --port 8888`
+`ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888`
 
 Now you should see the the /fmu/ topics being published!
 
- 
+
