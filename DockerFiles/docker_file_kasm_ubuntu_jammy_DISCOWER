@@ -20,13 +20,13 @@ RUN apt-get update && apt-get upgrade -y && \
     rm -rf /var/lib/apt/list/* && \
     echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
     true
-    
+
 # Cleaning up junk
 #RUN apt-get purge -y thunderbird* && \
 #    apt-get remove -y google-chrome-stable gimp zoom signal-desktop obs-studio onlyoffice-desktopeditors sublime-text && \
 #    apt-get autoremove -y && \
 #    apt-get clean
-    
+
 #RUN rm -f /home/kasm-user/Desktop/com.obsproject.Studio.desktop && \
 #    rm -f /home/kasm-user/Desktop/gimp.desktop && \
 #    rm -f /home/kasm-user/Desktop/google-chrome.desktop && \
@@ -36,7 +36,7 @@ RUN apt-get update && apt-get upgrade -y && \
 #    rm -f /home/kasm-user/Desktop/sublime_text.desktop && \
 #    rm -f /home/kasm-user/Desktop/telegram.desktop && \
 #    rm -f /home/kasm-user/Desktop/Zoom.desktop && \
-#    rm -f /home/kasm-user/Desktop/thunderbird.desktop                        
+#    rm -f /home/kasm-user/Desktop/thunderbird.desktop
 
 # Installing utilities
 RUN apt-get update
@@ -68,7 +68,7 @@ RUN apt-get update && apt-get install -y \
 RUN rosdep init && rosdep update --rosdistro $ROS_DISTRO
 
 RUN apt-get update && apt-get install -y ros-humble-desktop
-   
+
 RUN echo "source /opt/ros/humble/setup.bash" >> /home/kasm-user/.bashrc
 
 #RUN /bin/bash -c "source /opt/ros/humble/setup.bash && echo 'ROS2 IS SET UP'"
@@ -117,6 +117,29 @@ RUN . /opt/ros/humble/setup.sh && echo ${AMENT_PREFIX_PATH}
 #RUN sudo apt -y install $(sort -u $(find . -iname 'packages-'`lsb_release -cs`'.apt' -o -iname 'packages.apt' | grep -v '/\.git/') | sed '/gz\|sdf/d' | tr '\n' ' ')
 
 
+
+##################
+# QGroundControl #
+##################
+# RUN apt install aqtinstall
+# RUN mkdir ~/qt && cd ~/qt
+# RUN aqt install-qt linux desktop 6.6.3 gcc_64 -m qt5compat qtshadertools qtquick3d qtcharts qtconnectivity qtlocation qtmultimedia qtpositioning qtsensors qtserialport qtspeech
+# append folder to CMAKE_PREFIX_PATH
+# RUN echo "export CMAKE_PREFIX_PATH=/home/kasm-user/qt/6.6.3/gcc_64/lib/cmake:$CMAKE_PREFIX_PATH" >> /home/kasm-user/.bashrc
+# ENV CMAKE_PREFIX_PATH /home/kasm-user/qt/6.6.3/gcc_64/lib/cmake:$CMAKE_PREFIX_PATH
+# ENV PATH /home/kasm-user/qt/6.6.3/gcc_64/bin:$PATH
+# ENV LD_LIBRARY_PATH /home/kasm-user/qt/6.6.3/gcc_64/lib:$LD_LIBRARY_PATH
+# ENV QT_PLUGIN_PATH /home/kasm-user/qt/6.6.3/gcc_64/plugins:$QT_PLUGIN_PATH
+
+# https://docs.qgroundcontrol.com/master/en/qgc-dev-guide/getting_started/index.html
+# RUN git clone --recursive https://github.com/DISCOWER/qgroundcontrol.git ~/qgroundcontrol
+# RUN cd ~/qgroundcontrol
+# RUN git submodule update --recursive
+# RUN bash ./qgroundcontrol/tools/setup/install-dependencies-debian.sh
+# RUN cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+# RUN cmake --build build --config Debug
+
+
 ##################
 # DISCOWER stuff #
 ##################
@@ -127,7 +150,7 @@ RUN . /opt/ros/humble/setup.sh && echo ${AMENT_PREFIX_PATH}
 #RUN cd ~/gazebo_ws/src
 #RUN rm -rf gz-sim && git clone https://github.com/DISCOWER/gz-sim.git
 #RUN cd ~/gazebo_ws/src/gz-sim && git pull && git checkout origin/pr-spacecraft-thrusters
-#RUN cd ~/gazebo_ws && colcon build --merge-install 
+#RUN cd ~/gazebo_ws && colcon build --merge-install
 
 #RUN echo "source /home/kasm-user/gazebo_ws/install/setup.bash" >> /home/kasm-user/.bashrc
 #RUN source /home/kasm-user/gazebo_ws/install/setup.bash
