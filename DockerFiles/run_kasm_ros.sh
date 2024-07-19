@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Configurable variables
-DOCKER_IMAGE=62eb1ab76978
+DOCKER_IMAGE=599631481fe0
 
 WEB_PORT=10334
 SSH_PORT=7901
-CONTAINER_NAME=ff_ros2_DISCOWER_container
+CONTAINER_NAME=discower_GUI
 VNC_PASSWORD=password
 # NOETIC_BASE_DIR=${HOME}/workspace/ros_noetic
 
