@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Configurable variables
 DOCKER_IMAGE=599631481fe0
 
