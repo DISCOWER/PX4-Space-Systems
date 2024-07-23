@@ -18,19 +18,33 @@ if [ $(docker ps -aq -f name=^${CONTAINER_NAME}$) ]; then
 fi
 
 # Run the Docker container
-docker run -itd \
-      --shm-size 32g \
-      --runtime=nvidia \
-      --gpus all\
-      --privileged \
-      -p $WEB_PORT:6901 \
-      -p $SSH_PORT:22 \
-      --security-opt seccomp=unconfined \
-      -e VNC_PW=$VNC_PASSWORD \
-      -e NVIDIA_DRIVER_CAPABILITIES=all \
-      --name $CONTAINER_NAME \
-      $DOCKER_IMAGE
-      #--volume="${NOETIC_BASE_DIR}:/home/kasm-user/workspace:Z" \
+if command -v nvidia-smi &> /dev/null; then
+    # if we have an nvidia GPU
+    docker run -itd \
+            --shm-size 32g \
+            --runtime=nvidia \
+            --gpus all \
+            --privileged \
+            -p $WEB_PORT:6901 \
+            -p $SSH_PORT:22 \
+            --security-opt seccomp=unconfined \
+            -e VNC_PW=$VNC_PASSWORD \
+            -e NVIDIA_DRIVER_CAPABILITIES=all \
+            --name $CONTAINER_NAME \
+            $DOCKER_IMAGE
+            #--volume="${NOETIC_BASE_DIR}:/home/kasm-user/workspace:Z" \
+else
+    docker run -itd \
+            --shm-size 32g \
+            --privileged \
+            -p $WEB_PORT:6901 \
+            -p $SSH_PORT:22 \
+            --security-opt seccomp=unconfined \
+            -e VNC_PW=$VNC_PASSWORD \
+            --name $CONTAINER_NAME \
+            $DOCKER_IMAGE
+            #--volume="${NOETIC_BASE_DIR}:/home/kasm-user/workspace:Z" \
+fi
 
 # Check if Docker run was successful
 if [ $? -eq 0 ]; then
