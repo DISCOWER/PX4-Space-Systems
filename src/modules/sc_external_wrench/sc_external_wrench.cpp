@@ -82,7 +82,7 @@ ScExternalWrench *ScExternalWrench::instantiate(int argc, char *argv[])
 			break;
 
 		case 'f':
-			update_Frequency = atoi(myoptarg);
+			update_frequency = atoi(myoptarg);
 			break;
 
 		default:
@@ -148,7 +148,7 @@ void ScExternalWrench::run()
 		vehicle_torque_setpoint_s wrench_torque;
 		if (_vehicle_external_thrust_sub.update(&wrench_thrust)) {
 			// check timestamp
-			if (hrt_elapsed_time(&wrench_thrust.timestamp) < 1.0 / (float)_update_frequency) {
+			if (hrt_elapsed_time(&wrench_thrust.timestamp) < 1.0 / (double)update_frequency) {
 				_vehicle_external_thrust = wrench_thrust;
 				thrust_timeout = false;
 			}
@@ -156,7 +156,7 @@ void ScExternalWrench::run()
 
 		if (_vehicle_external_torque_sub.update(&wrench_torque)) {
 			// check timestamp
-			if (hrt_elapsed_time(&wrench_torque.timestamp) < 1.0 / (float)_update_frequency) {
+			if (hrt_elapsed_time(&wrench_torque.timestamp) < 1.0 / (double)update_frequency) {
 				_vehicle_external_torque = wrench_torque;
 				torque_timeout = false;
 			}

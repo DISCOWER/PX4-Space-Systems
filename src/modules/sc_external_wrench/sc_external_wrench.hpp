@@ -31,10 +31,10 @@
  *
  ****************************************************************************/
 /**
- * @file sc_thruster_controller.c
- * For controlling solenoid cold gas thrusters in space robotics
+ * @file sc_external_wrench.c
+ * Controls extra, more precise actuators for external disturbances.
  *
- * @author Elias Krantz <eliaskra@kth.se>
+ * @author Pedro Roque <padr@kth.se>
  */
 #pragma once
 
@@ -52,15 +52,16 @@
 #include <poll.h>
 
 #include <uORB/uORB.h>
-#include <uORB/topics/vehicle_external_wrench_thrust.h>
-#include <uORB/topics/vehicle_external_wrench_torque.h>
-#include <uORB/topics/vehicle_external_wrench_thrust_allocation.h>
-#include <uORB/topics/vehicle_external_wrench_torque_allocation.h>
+#include <uORB/Publication.hpp>
+#include <uORB/Subscription.hpp>
+#include <uORB/topics/vehicle_thrust_setpoint.h>
+#include <uORB/topics/vehicle_torque_setpoint.h>
+#include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/mavlink_log.h>
 
 using namespace time_literals;
 
-extern "C" __EXPORT int sc_thruster_controller_main(int argc, char *argv[]);
+extern "C" __EXPORT int sc_external_wrench_main(int argc, char *argv[]);
 
 class ScExternalWrench : public ModuleBase<ScExternalWrench>, public ModuleParams
 {
@@ -101,7 +102,7 @@ private:
 
 	// Flags
 	static bool _timeout;
-	uint update_frequency;
+	static uint update_frequency;
 	bool _enabled = false;
 
 	// Subscriptions
@@ -111,7 +112,7 @@ private:
 
 	uORB::Subscription _vehicle_external_thrust_sub{ORB_ID(vehicle_external_wrench_thrust)};
 	uORB::Subscription _vehicle_external_torque_sub{ORB_ID(vehicle_external_wrench_torque)};
-	vehicle_torque_setpoint_s _vehicle_external_thrust {};
+	vehicle_thrust_setpoint_s _vehicle_external_thrust {};
 	vehicle_torque_setpoint_s _vehicle_external_torque {};
 
 	uORB::Publication<vehicle_thrust_setpoint_s>  _vehicle_external_thrust_allocation_pub{ORB_ID(vehicle_external_wrench_thrust_allocation)};
@@ -119,3 +120,4 @@ private:
 };
 
 bool ScExternalWrench::_timeout = true;
+uint ScExternalWrench::update_frequency = 100;
