@@ -108,32 +108,32 @@ param set-default CA_THRUSTER7_AX 0.0
 param set-default CA_THRUSTER7_AY -1.0
 param set-default CA_THRUSTER7_AZ 0.0
 
-param set-default SIM_GZ_EC_FUNC1 501
-param set-default SIM_GZ_EC_FUNC2 502
-param set-default SIM_GZ_EC_FUNC3 503
-param set-default SIM_GZ_EC_FUNC4 504
-param set-default SIM_GZ_EC_FUNC5 505
-param set-default SIM_GZ_EC_FUNC6 506
-param set-default SIM_GZ_EC_FUNC7 507
-param set-default SIM_GZ_EC_FUNC8 508
+param set-default SIM_GZ_TH_FUNC1 501
+param set-default SIM_GZ_TH_FUNC2 502
+param set-default SIM_GZ_TH_FUNC3 503
+param set-default SIM_GZ_TH_FUNC4 504
+param set-default SIM_GZ_TH_FUNC5 505
+param set-default SIM_GZ_TH_FUNC6 506
+param set-default SIM_GZ_TH_FUNC7 507
+param set-default SIM_GZ_TH_FUNC8 508
 
-param set-default SIM_GZ_EC_MIN1 0
-param set-default SIM_GZ_EC_MIN2 0
-param set-default SIM_GZ_EC_MIN3 0
-param set-default SIM_GZ_EC_MIN4 0
-param set-default SIM_GZ_EC_MIN5 0
-param set-default SIM_GZ_EC_MIN6 0
-param set-default SIM_GZ_EC_MIN7 0
-param set-default SIM_GZ_EC_MIN8 0
+param set-default SIM_GZ_TH_MIN1 0
+param set-default SIM_GZ_TH_MIN2 0
+param set-default SIM_GZ_TH_MIN3 0
+param set-default SIM_GZ_TH_MIN4 0
+param set-default SIM_GZ_TH_MIN5 0
+param set-default SIM_GZ_TH_MIN6 0
+param set-default SIM_GZ_TH_MIN7 0
+param set-default SIM_GZ_TH_MIN8 0
 
-param set-default SIM_GZ_EC_MAX1 10000
-param set-default SIM_GZ_EC_MAX2 10000
-param set-default SIM_GZ_EC_MAX3 10000
-param set-default SIM_GZ_EC_MAX4 10000
-param set-default SIM_GZ_EC_MAX5 10000
-param set-default SIM_GZ_EC_MAX6 10000
-param set-default SIM_GZ_EC_MAX7 10000
-param set-default SIM_GZ_EC_MAX8 10000
+param set-default SIM_GZ_TH_MAX1 10000
+param set-default SIM_GZ_TH_MAX2 10000
+param set-default SIM_GZ_TH_MAX3 10000
+param set-default SIM_GZ_TH_MAX4 10000
+param set-default SIM_GZ_TH_MAX5 10000
+param set-default SIM_GZ_TH_MAX6 10000
+param set-default SIM_GZ_TH_MAX7 10000
+param set-default SIM_GZ_TH_MAX8 10000
 
 # Controller Tunings
 param set SC_YAWRATE_P 3.335
