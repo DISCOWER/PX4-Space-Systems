@@ -1,0 +1,5 @@
+menuconfig MODULES_SC_EXTERNAL_WRENCH
+	bool "sc_external_wrench"
+	default n
+	---help---
+		Enable support for sc_external_wrench
