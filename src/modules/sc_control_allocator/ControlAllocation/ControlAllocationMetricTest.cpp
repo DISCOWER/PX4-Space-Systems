@@ -48,7 +48,7 @@ using namespace matrix;
 
 namespace
 {
-	// Creates a 2D spacecraft with 8 thrusters (one in each corner fo the axis, NED Frame):
+	// Creates a 2D spacecraft with 8 thrusters (one in each corner of the axis, NED Frame):
 	//           1 <--> 0
 	//               x
 	//		 |
@@ -195,12 +195,21 @@ TEST(ControlAllocationMetricTest, MetricOutputProportional)
 	control_sp(ControlAllocation::ControlAxis::THRUST_Z) = 0.f;
 	allocator.setControlSetpoint(control_sp);
 
-	// Since MC_AIRMODE was not set explicitly, assume airmode is disabled.
 	allocator.allocate();
 
 	const auto &actuator_sp = allocator.getActuatorSetpoint();
 
 	// print each actuator setpoint
 	actuator_sp.print();
+
+	// ensure that outputs match expected
+	EXPECT_NEAR(actuator_sp(0), 0.0f, 1e-4);
+	EXPECT_NEAR(actuator_sp(1), 0.0f, 1e-4);
+	EXPECT_NEAR(actuator_sp(2), 0.0f, 1e-4);
+	EXPECT_NEAR(actuator_sp(3), 0.0f, 1e-4);
+	EXPECT_NEAR(actuator_sp(4), 0.06250f, 1e-4);
+	EXPECT_NEAR(actuator_sp(5), -0.06250f, 1e-4);
+	EXPECT_NEAR(actuator_sp(6), 0.06250f, 1e-4);
+	EXPECT_NEAR(actuator_sp(7), -0.06250f, 1e-4);
 
 }
