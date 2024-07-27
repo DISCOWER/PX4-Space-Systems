@@ -187,6 +187,10 @@ ControlAllocator::update_allocation_method(bool force)
 				_control_allocation[i] = new ControlAllocationSequentialDesaturation();
 				break;
 
+			case AllocationMethod::METRIC:
+				_control_allocation[i] = new ControlAllocationMetric();
+				break;
+
 			default:
 				PX4_ERR("Unknown allocation method");
 				break;
@@ -196,8 +200,11 @@ ControlAllocator::update_allocation_method(bool force)
 				PX4_ERR("alloc failed");
 				_num_control_allocation = 0;
 
-			} else {
+			} else if (method != AllocationMethod::METRIC) {
 				_control_allocation[i]->setNormalizeRPY(normalize_rpy[i]);
+				_control_allocation[i]->setActuatorSetpoint(actuator_sp[i]);
+			} else {
+				// METRIC does not need actuator setpoints
 				_control_allocation[i]->setActuatorSetpoint(actuator_sp[i]);
 			}
 		}
@@ -834,6 +841,10 @@ int ControlAllocator::print_status()
 
 	case AllocationMethod::AUTO:
 		PX4_INFO("Method: Auto");
+		break;
+
+	case AllocationMethod::METRIC:
+		PX4_INFO("Method: Metric");
 		break;
 	}
 

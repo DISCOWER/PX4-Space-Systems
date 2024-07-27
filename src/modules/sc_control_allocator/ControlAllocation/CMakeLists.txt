@@ -36,6 +36,8 @@ px4_add_library(ControlAllocation
 	ControlAllocation.hpp
 	ControlAllocationPseudoInverse.cpp
 	ControlAllocationPseudoInverse.hpp
+	ControlAllocationMetric.cpp
+	ControlAllocationMetric.hpp
 	ControlAllocationSequentialDesaturation.cpp
 	ControlAllocationSequentialDesaturation.hpp
 )
@@ -45,3 +47,4 @@ target_link_libraries(ControlAllocation PRIVATE mathlib)
 
 px4_add_unit_gtest(SRC ControlAllocationPseudoInverseTest.cpp LINKLIBS ControlAllocation)
 px4_add_functional_gtest(SRC ControlAllocationSequentialDesaturationTest.cpp LINKLIBS ControlAllocation ActuatorEffectiveness)
+px4_add_functional_gtest(SRC ControlAllocationMetricTest.cpp LINKLIBS ControlAllocation ActuatorEffectiveness)

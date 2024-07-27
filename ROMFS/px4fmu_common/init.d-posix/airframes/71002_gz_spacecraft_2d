@@ -30,7 +30,7 @@ param set-default CA_R_REV 255
 # param set-default FW_ARSP_MODE 1
 
 # Auto to be provided by Custom Airframe
-param set-default CA_METHOD 0
+param set-default CA_METHOD 3  # 0 is PseudoInverse, 3 is Metric
 
 # Set proper failsafes
 param set-default COM_ACT_FAIL_ACT 0

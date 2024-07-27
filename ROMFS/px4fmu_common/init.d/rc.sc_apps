@@ -15,7 +15,7 @@ ekf2 start &
 #
 # Start Control Allocator
 #
-control_allocator start
+sc_control_allocator start
 
 #
 # Start Spacecraft Rate Controller.
@@ -34,4 +34,3 @@ sc_pos_control start
 
 # Start Space Robot Thruster Controller
 sc_external_wrench start
-
