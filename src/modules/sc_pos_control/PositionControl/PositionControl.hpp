@@ -43,6 +43,7 @@
 #include <matrix/matrix/math.hpp>
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/vehicle_attitude.h>
+#include <uORB/topics/vehicle_angular_velocity.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 
@@ -124,6 +125,14 @@ public:
 	 */
 	void setState(const PositionControlStates &states);
 
+	void setAttitudeStates(vehicle_attitude_s &att, vehicle_angular_velocity_s &ang_vel)
+	{
+		_att = matrix::Quatf(att.q);
+		_ang_vel(0) = ang_vel.xyz[0];
+		_ang_vel(1) = ang_vel.xyz[1];
+		_ang_vel(2) = ang_vel.xyz[2];
+	}
+
 	/**
 	 * Pass the desired setpoints
 	 * Note: NAN value means no feed forward/leave state uncontrolled if there's no higher order setpoint.
@@ -157,7 +166,7 @@ public:
 	 * It needs to be executed by the attitude controller to achieve velocity and position tracking.
 	 * @param attitude_setpoint reference to struct to fill up
 	 */
-	void getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint, vehicle_attitude_s &v_att) const;
+	void getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const;
 
 	/**
 	 * All setpoints are set to NAN (uncontrolled). Timestampt zero.
@@ -194,7 +203,8 @@ private:
 	matrix::Vector3f _vel; /**< current velocity */
 	matrix::Vector3f _vel_dot; /**< velocity derivative (replacement for acceleration estimate) */
 	matrix::Vector3f _vel_int; /**< integral term of the velocity controller */
-	matrix::Quatf _att_q; /**< current attitude */
+	matrix::Quatf _att; /**< current attitude */
+	matrix::Vector3f _ang_vel; /**< current angular velocity */
 	float _yaw{}; /**< current heading */
 
 	// Setpoints

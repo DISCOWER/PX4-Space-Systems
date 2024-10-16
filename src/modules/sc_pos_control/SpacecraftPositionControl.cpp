@@ -233,9 +233,7 @@ void SpacecraftPositionControl::Run()
 	perf_begin(_cycle_perf);
 	vehicle_local_position_s vehicle_local_position;
 	vehicle_attitude_s v_att;
-	#ifdef MPC_CTL
 	vehicle_angular_velocity_s angular_velocity;
-	#endif
 
 	if (_local_pos_sub.update(&vehicle_local_position)) {
 		const float dt =
@@ -263,9 +261,7 @@ void SpacecraftPositionControl::Run()
 		// 		 _control.resetIntegral();
 		_trajectory_setpoint_sub.update(&_setpoint);
 		_vehicle_attitude_sub.update(&v_att);
-		#ifdef MPC_CTL
 		_vehicle_angular_velocity_sub.update(&angular_velocity);
-		#endif
 
 		// adjust existing (or older) setpoint with any EKF reset deltas
 		if ((_setpoint.timestamp != 0) && (_setpoint.timestamp < vehicle_local_position.timestamp)) {
@@ -335,9 +331,7 @@ void SpacecraftPositionControl::Run()
 			_control.setInputSetpoint(_setpoint);
 
 			_control.setState(states);
-			#ifdef MPC_CTL
 			_control.setAttitudeStates(v_att, angular_velocity);
-			#endif
 
 			// Run position control
 			if (!_control.update(dt)) {

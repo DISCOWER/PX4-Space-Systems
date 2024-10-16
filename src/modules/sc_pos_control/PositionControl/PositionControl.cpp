@@ -85,7 +85,7 @@ void ScPositionControl::setState(const PositionControlStates &states)
 	_pos = states.position;
 	_vel = states.velocity;
 	_vel_dot = states.acceleration;
-	_att_q = states.quaternion;
+	_att = states.quaternion;
 }
 
 void ScPositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
@@ -194,11 +194,10 @@ bool ScPositionControl::_inputValid()
 	return valid;
 }
 
-void ScPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint,
-		vehicle_attitude_s &v_att) const
+void ScPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
 {
 	// Set thrust setpoint
-	const Dcmf R_to_body(Quatf(v_att.q).inversed());
+	const Dcmf R_to_body(_att.inversed());
 	matrix::Vector3f b_thr_sp = R_to_body * _thr_sp;
 	attitude_setpoint.thrust_body[0] = b_thr_sp(0);
 	attitude_setpoint.thrust_body[1] = b_thr_sp(1);
@@ -212,9 +211,9 @@ void ScPositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitud
 		attitude_setpoint.q_d[3] = _quat_sp(3);
 
 	} else {
-		attitude_setpoint.q_d[0] = v_att.q[0];
-		attitude_setpoint.q_d[1] = v_att.q[1];
-		attitude_setpoint.q_d[2] = v_att.q[2];
-		attitude_setpoint.q_d[3] = v_att.q[3];
+		attitude_setpoint.q_d[0] = _att(0);
+		attitude_setpoint.q_d[1] = _att(1);
+		attitude_setpoint.q_d[2] = _att(2);
+		attitude_setpoint.q_d[3] = _att(3);
 	}
 }
