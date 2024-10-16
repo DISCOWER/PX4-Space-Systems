@@ -18,7 +18,8 @@ mc_rate_control start
 #
 # Start Multicopter Attitude Controller.
 #
-mc_att_control start
+# TODO(@Pedro-Roque): I commented this to test MPC
+# mc_att_control start
 
 if param greater -s MC_AT_EN 0
 then
@@ -30,7 +31,11 @@ fi
 #
 mc_hover_thrust_estimator start
 flight_mode_manager start
+# TODO(@Pedro-Roque): I commented this to test MPC
 mc_pos_control start
+
+# TODO(@Pedro-Roque): I added this line to test MPC
+# mc_pos_mpc_control start
 
 #
 # Start Multicopter Land Detector.

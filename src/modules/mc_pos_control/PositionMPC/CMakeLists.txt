@@ -31,18 +31,13 @@
 #
 ############################################################################
 
-px4_add_module(
-	MODULE modules__sc_rate_control
-	MAIN sc_rate_control
-	COMPILE_FLAGS
-		${MAX_CUSTOM_OPT_LEVEL}
-	SRCS
-		SpacecraftRateControl.cpp
-		SpacecraftRateControl.hpp
-	DEPENDS
-		circuit_breaker
-		mathlib
-		tinympc
-		RateControl
-		px4_work_queue
-	)
+px4_add_library(PositionMPC
+	ControlMath.cpp
+	ControlMath.hpp
+	PositionMPC.cpp
+	PositionMPC.hpp
+)
+target_include_directories(PositionMPC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+# px4_add_unit_gtest(SRC ControlMathTest.cpp LINKLIBS PositionControl)
+# px4_add_unit_gtest(SRC PositionControlTest.cpp LINKLIBS PositionControl)

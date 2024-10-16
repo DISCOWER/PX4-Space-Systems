@@ -181,7 +181,7 @@ private:
 
 	/**
 	 * @brief publishes target setpoint.
-	 * 
+	 *
 	 */
     void publishLocalPositionSetpoint(vehicle_attitude_setpoint_s &_att_sp);
 

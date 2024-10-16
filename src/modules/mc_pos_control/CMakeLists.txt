@@ -33,6 +33,7 @@
 
 add_subdirectory(GotoControl)
 add_subdirectory(PositionControl)
+add_subdirectory(PositionMPC)
 add_subdirectory(Takeoff)
 
 px4_add_module(
@@ -45,6 +46,7 @@ px4_add_module(
 	DEPENDS
 		GotoControl
 		PositionControl
+		PositionMPC
 		Takeoff
 		controllib
 		geo

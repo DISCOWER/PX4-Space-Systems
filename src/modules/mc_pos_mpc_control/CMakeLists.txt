@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2019 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2024 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -32,17 +32,14 @@
 ############################################################################
 
 px4_add_module(
-	MODULE modules__sc_rate_control
-	MAIN sc_rate_control
+	MODULE modules__mc_pos_mpc_control
+	MAIN mc_pos_mpc_control
 	COMPILE_FLAGS
 		${MAX_CUSTOM_OPT_LEVEL}
 	SRCS
-		SpacecraftRateControl.cpp
-		SpacecraftRateControl.hpp
+		mc_pos_mpc_control.cpp
+		mc_pos_mpc_control.hpp
 	DEPENDS
 		circuit_breaker
-		mathlib
-		tinympc
-		RateControl
 		px4_work_queue
 	)
