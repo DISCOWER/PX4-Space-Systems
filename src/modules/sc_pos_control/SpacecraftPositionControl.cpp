@@ -112,17 +112,22 @@ void SpacecraftPositionControl::parameters_update(bool force)
 		if (num_changed > 0) {
 			param_notify_changes();
 		}
-		
+
 		// Set PI and PID gains, as well as anti-windup limits
+		#ifndef MPC_CTL
 		_control.setPositionGains(
 			Vector3f(_param_mpc_pos_p.get(), _param_mpc_pos_p.get(), _param_mpc_pos_p.get()),
 			Vector3f(_param_mpc_pos_i.get(), _param_mpc_pos_i.get(), _param_mpc_pos_i.get()));
 		_control.setPositionIntegralLimits(_param_mpc_pos_i_lim.get());
+		_control.setVelocityIntegralLimits(_param_mpc_vel_i_lim.get());
+		#else
+		_control.setPositionGains(Vector3f(_param_mpc_pos_p.get(), _param_mpc_pos_p.get(), _param_mpc_pos_p.get()));
+		#endif
+
 		_control.setVelocityGains(
 			Vector3f(_param_mpc_vel_p_acc.get(), _param_mpc_vel_p_acc.get(), _param_mpc_vel_p_acc.get()),
 			Vector3f(_param_mpc_vel_i_acc.get(), _param_mpc_vel_i_acc.get(), _param_mpc_vel_i_acc.get()),
 			Vector3f(_param_mpc_vel_d_acc.get(), _param_mpc_vel_d_acc.get(), _param_mpc_vel_d_acc.get()));
-		_control.setVelocityIntegralLimits(_param_mpc_vel_i_lim.get());
 
 		// Check that the design parameters are inside the absolute maximum constraints
 		if (_param_mpc_vel_cruise.get() > _param_mpc_vel_max.get()) {
@@ -228,6 +233,9 @@ void SpacecraftPositionControl::Run()
 	perf_begin(_cycle_perf);
 	vehicle_local_position_s vehicle_local_position;
 	vehicle_attitude_s v_att;
+	#ifdef MPC_CTL
+	vehicle_angular_velocity_s angular_velocity;
+	#endif
 
 	if (_local_pos_sub.update(&vehicle_local_position)) {
 		const float dt =
@@ -255,6 +263,9 @@ void SpacecraftPositionControl::Run()
 		// 		 _control.resetIntegral();
 		_trajectory_setpoint_sub.update(&_setpoint);
 		_vehicle_attitude_sub.update(&v_att);
+		#ifdef MPC_CTL
+		_vehicle_angular_velocity_sub.update(&angular_velocity);
+		#endif
 
 		// adjust existing (or older) setpoint with any EKF reset deltas
 		if ((_setpoint.timestamp != 0) && (_setpoint.timestamp < vehicle_local_position.timestamp)) {
@@ -315,34 +326,31 @@ void SpacecraftPositionControl::Run()
 
 		if (_vehicle_control_mode.flag_control_position_enabled
 		    && (_setpoint.timestamp >= _time_position_control_enabled)) {
-
+			#ifndef MPC_CTL
 			_control.setThrustLimit(_param_mpc_thr_max.get());
-
 			_control.setVelocityLimits(_param_mpc_vel_max.get());
+			#endif
+
 
 			_control.setInputSetpoint(_setpoint);
 
 			_control.setState(states);
+			#ifdef MPC_CTL
+			_control.setAttitudeStates(v_att, angular_velocity);
+			#endif
 
 			// Run position control
 			if (!_control.update(dt)) {
 				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, true));
+				#ifndef MPC_CTL
 				_control.setVelocityLimits(_param_mpc_vel_max.get());
+				#endif
 				_control.update(dt);
 			}
 
 			// Publish attitude setpoint output
 			vehicle_attitude_setpoint_s attitude_setpoint{};
-			_control.getAttitudeSetpoint(attitude_setpoint, v_att);
-			// PX4_INFO("States: %f %f %f / %f %f %f", (double)states.position(0), (double)states.position(1),
-			// 	 (double)states.position(2), (double)states.velocity(0), (double)states.velocity(1),
-			// 	 (double)states.velocity(2));
-			// PX4_INFO("Setpoint: %f %f %f / %f %f %f", (double)_setpoint.position[0], (double)_setpoint.position[1],
-			// 	 (double)_setpoint.position[2], (double)_setpoint.velocity[0], (double)_setpoint.velocity[1],
-			// 	 (double)_setpoint.velocity[2]);
-			// PX4_INFO("Control input: %f %f %f / %f %f %f %f", (double)attitude_setpoint.thrust_body[0], (double)attitude_setpoint.thrust_body[1],
-			// 	(double)attitude_setpoint.thrust_body[2], (double)attitude_setpoint.q_d[0], (double)attitude_setpoint.q_d[1],
-			// 	(double)attitude_setpoint.q_d[2], (double)attitude_setpoint.q_d[3]);
+			_control.getAttitudeSetpoint(attitude_setpoint);
 			attitude_setpoint.timestamp = hrt_absolute_time();
 			_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
 
@@ -387,7 +395,7 @@ void SpacecraftPositionControl::poll_manual_setpoint(const float dt,
 			if (!_vehicle_control_mode.flag_control_climb_rate_enabled &&
 			    !_vehicle_control_mode.flag_control_offboard_enabled) {
 
-				if (_vehicle_control_mode.flag_control_attitude_enabled && 
+				if (_vehicle_control_mode.flag_control_attitude_enabled &&
 					_vehicle_control_mode.flag_control_position_enabled) {
 					// We are in Stabilized mode
 					// Generate position setpoints
@@ -404,7 +412,7 @@ void SpacecraftPositionControl::poll_manual_setpoint(const float dt,
 					// Update velocity setpoint
 					Vector3f target_vel_sp = Vector3f(_manual_control_setpoint.pitch, _manual_control_setpoint.roll, 0.0);
 					target_pos_sp = target_pos_sp + target_vel_sp * dt;
-					
+
 					// Update _setpoint
 					_setpoint.position[0] = target_pos_sp(0);
 					_setpoint.position[1] = target_pos_sp(1);

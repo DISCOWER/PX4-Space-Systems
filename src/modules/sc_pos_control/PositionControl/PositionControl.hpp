@@ -51,6 +51,7 @@ struct PositionControlStates {
 	matrix::Vector3f velocity;
 	matrix::Vector3f acceleration;
 	matrix::Quatf quaternion;  // bypassed to attitude controller
+	float yaw;
 };
 
 /**
@@ -84,11 +85,11 @@ public:
 
 	/**
 	 * @brief Set the Position Integral Limits object
-	 * 
+	 *
 	 * @param lim float limit to be set (on all axis)
 	 */
 	void setPositionIntegralLimits(const float lim);
-	
+
 	/**
 	 * Set the velocity control gains
 	 * @param P 3D vector of proportional gains for x,y,z axis
@@ -105,7 +106,7 @@ public:
 
 	/**
 	 * @brief Set the Velocity Integral Limits object
-	 * 
+	 *
 	 * @param lim float limit to be set (on all axis)
 	 */
 	void setVelocityIntegralLimits(const float lim);

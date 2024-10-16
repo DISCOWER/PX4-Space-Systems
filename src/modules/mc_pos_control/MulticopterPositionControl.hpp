@@ -38,7 +38,6 @@
 #pragma once
 
 #include "PositionControl/PositionControl.hpp"
-#include "PositionMPC/PositionMPC.hpp"
 #include "Takeoff/Takeoff.hpp"
 #include "GotoControl/GotoControl.hpp"
 
@@ -191,10 +190,7 @@ private:
 	control::BlockDerivative _vel_z_deriv; /**< velocity derivative in z */
 
 	GotoControl _goto_control; ///< class for handling smooth goto position setpoints
-	// TODO(@Pedro-Roque): I commented this out. Probably would be better to make this
-	// selectable by having an inheritable class
-	// PositionControl _control; ///< class for core PID position control
-	PositionMPC _control; ///< class for core MPC position control
+	PositionControl _control; ///< class for core PID position control
 
 	hrt_abstime _last_warn{0}; /**< timer when the last warn message was sent out */
 

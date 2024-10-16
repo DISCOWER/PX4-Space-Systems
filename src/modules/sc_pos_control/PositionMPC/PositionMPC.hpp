@@ -44,6 +44,8 @@
 #include <uORB/topics/trajectory_setpoint.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
+#include <uORB/topics/vehicle_attitude.h>
+#include <uORB/topics/vehicle_angular_velocity.h>
 
 /**
  * 	Core Position-Control for MC.
@@ -128,7 +130,7 @@ public:
 
 	/**
 	 * Pass the current vehicle state to the controller
-	 * @param PositionControlStates structure
+	 * @param PositionMPCStates structure
 	 */
 
 	template <typename T> void setState(const T &states)
@@ -138,6 +140,15 @@ public:
 		_yaw = states.yaw;
 		_vel_dot = states.acceleration;
 	}
+
+	void setAttitudeStates(vehicle_attitude_s &att, vehicle_angular_velocity_s &ang_vel)
+	{
+		_att = matrix::Quatf(att.q);
+		_ang_vel(0) = ang_vel.xyz[0];
+		_ang_vel(1) = ang_vel.xyz[1];
+		_ang_vel(2) = ang_vel.xyz[2];
+	}
+
 
 	/**
 	 * Pass the desired setpoints
@@ -162,6 +173,7 @@ public:
 	 * @see _vel_int
 	 */
 	void resetIntegral() { _vel_int.setZero(); }
+	void resetIntegralXY() { };
 
 	/**
 	 * If set, the tilt setpoint is computed by assuming no vertical acceleration
@@ -221,6 +233,8 @@ private:
 	// States
 	matrix::Vector3f _pos; /**< current position */
 	matrix::Vector3f _vel; /**< current velocity */
+	matrix::Quatf _att; /**< current attitude */
+	matrix::Vector3f _ang_vel; /**< current angular velocity */
 	matrix::Vector3f _vel_dot; /**< velocity derivative (replacement for acceleration estimate) */
 	matrix::Vector3f _vel_int; /**< integral term of the velocity controller */
 	float _yaw{}; /**< current heading */

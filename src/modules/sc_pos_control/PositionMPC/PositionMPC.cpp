@@ -42,6 +42,7 @@
 #include <px4_platform_common/defines.h>
 #include <geo/geo.h>
 #include <lib/tinympc/tinympc.h>
+#include <iostream>
 
 
 // TinyMPC variables
@@ -49,21 +50,21 @@
 #define DT 0.002f    // dt
 #define NSTATES 12   // no. of states (error state)
 #define NINPUTS 4    // no. of controls
-#define NHORIZON 5   // horizon steps (NHORIZON states and NHORIZON-1 controls)
+#define NHORIZON 20   // horizon steps (NHORIZON states and NHORIZON-1 controls)
 
 #define PUBLISH_RATE 1 // 1 for true, 0 for false. If false, publishes Torque and Thrust setpoints at 500Hz
 
 #include "params/params_500hz.h"
-#include "params/traj_fig8.h"
+// #include "params/traj_fig8.h"
 
 /* Allocate global variables for MPC */
 static float f_data[NSTATES] = {0};
 
 // Create data array, all zero initialization
 static float x0_data[NSTATES] = {0.0f};       // initial state
-//static float xg_data[NSTATES] = {0.0f};       // goal state (if not tracking)
+static float xg_data[NSTATES] = {0.0f};       // goal state (if not tracking)
 static float ug_data[NINPUTS] = {0.0f};       // goal input
-static float Xref_data[NSTATES * NHORIZON] = {0};
+// static float Xref_data[NSTATES * NHORIZON] = {0};
 static float X_data[NSTATES * NHORIZON] = {0.0f};        // X in MPC solve
 static float U_data[NINPUTS * (NHORIZON - 1)] = {0.0f};  // U in MPC solve
 static float d_data[NINPUTS * (NHORIZON - 1)] = {0.0f};
@@ -103,17 +104,9 @@ static tiny_AdmmSolution mpc_soln;
 static tiny_AdmmWorkspace mpc_work;
 
 // Helper variables
-// static bool isInit = false;  // fix for tracking problem
-// static uint32_t mpcTime = 0;
 static float u_hover = 0.67f;
-// static int8_t result = 0;
-static uint32_t step = 0;
-static uint32_t traj_length = T_ARRAY_SIZE(X_ref_data) / 3;
-static uint32_t traj_idx = 0;
-static int8_t traj_hold = 1;  // hold current trajectory for this no of steps
-static bool en_traj = false;
 
-const trajectory_setpoint_s PositionMPC::empty_trajectory_setpoint = {0, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN, NAN}, {NAN, NAN, NAN}, NAN, NAN};
+const trajectory_setpoint_s PositionMPC::empty_trajectory_setpoint  = {0, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN, NAN}, {NAN, NAN, NAN}, NAN, NAN};
 
 PositionMPC::PositionMPC(){
 	// Initialize MPC
@@ -134,16 +127,7 @@ PositionMPC::PositionMPC(){
 	tiny_InitSolnDualsFromArray(&mpc_work, 0, YU, 0, YU_data, 0);
 
 	tiny_SetInitialState(&mpc_work, x0_data);
-	// tiny_SetGoalReference(&work, Xref, Uref, xg_data, ug_data);
-
-	mpc_data.Xref = Xref;
-	mpc_data.Uref = Uref;
-	for (int i = 0; i < NHORIZON; ++i) {
-		if (i < NHORIZON - 1) {
-			Uref[i] = slap_MatrixFromArray(NINPUTS, 1, ug_data);
-		}
-			Xref[i] = slap_MatrixFromArray(NSTATES, 1, &X_ref_data[i * NSTATES]);
-	}
+	tiny_SetGoalReference(&mpc_work, Xref, Uref, xg_data, ug_data);
 
 	// Set up LQR cost
 	tiny_InitDataQuadCostFromArray(&mpc_work, Q_data, R_data);
@@ -167,10 +151,6 @@ PositionMPC::PositionMPC(){
 	stgs.check_termination = 2;
 	stgs.tol_abs_dual = 5e-2;
 	stgs.tol_abs_prim = 5e-2;
-
-	/* End of MPC initialization */
-	step = 0;
-	en_traj = true;
 }
 
 void PositionMPC::setVelocityGains(const matrix::Vector3f &P, const matrix::Vector3f &I, const matrix::Vector3f &D)
@@ -229,52 +209,67 @@ bool PositionMPC::update(const float dt)
 	bool valid = _inputValid();
 
 	if (valid) {
-		/* run controller on gyro changes */
-		if (step % traj_hold == 0 && en_traj == true) {
-		traj_idx = (int)(step / traj_hold);
-			for (int i = 0; i < NHORIZON; ++i) {
-				for (int j = 0; j < 3; ++j) {
-					Xref_data[i*NSTATES + j] = X_ref_data[(traj_idx + i)*3+j];
-				}
-			}
-		}
+		// Set starting state (x0)
+		x0_data[0] = PX4_ISFINITE(_pos(0)) ? _pos(0) : 0.f;
+		x0_data[1] = -PX4_ISFINITE(_pos(1)) ? _pos(1) : 0.f;
+		x0_data[2] = -PX4_ISFINITE(_pos(2)) ? _pos(2) : 0.f;
+		// Body velocity error, [m/s]
+		x0_data[6] = PX4_ISFINITE(_vel(0)) ? _vel(0) : 0.f;
+		x0_data[7] = -PX4_ISFINITE(_vel(1)) ? _vel(1) : 0.f;
+		x0_data[8] = -PX4_ISFINITE(_vel(2)) ? _vel(2) : 0.f;
+		// Angular rate error, [rad/s]
+		x0_data[9]  = PX4_ISFINITE(_ang_vel(0)) ? _ang_vel(0) : 0.f;
+		x0_data[10] = PX4_ISFINITE(_ang_vel(1)) ? _ang_vel(1) : 0.f;
+		x0_data[11] = PX4_ISFINITE(_ang_vel(2)) ? _ang_vel(2) : 0.f;
+		// Attitude error
+		matrix::Quatf quat_from_lib = matrix::Quatf(_att(0), _att(1), -_att(2), -_att(3));
+		matrix::Eulerf q_to_euler(quat_from_lib);
+		x0_data[3] = q_to_euler.phi();
+		x0_data[4] = q_to_euler.theta();
+		x0_data[5] = _yaw;
 
-		// // Set starting state (x0)
-		// x0_data[0] = vehicle_local_position.x;
-		// x0_data[1] = vehicle_local_position.y;
-		// x0_data[2] = vehicle_local_position.z;
-		// // Body velocity error, [m/s]
-		// x0_data[6] = vehicle_local_position.vx;
-		// x0_data[7] = vehicle_local_position.vy;
-		// x0_data[8] = vehicle_local_position.vz;
-		// // Angular rate error, [rad/s]
-		// x0_data[9]  = angular_velocity.xyz[0];
-		// x0_data[10] = angular_velocity.xyz[1];
-		// x0_data[11] = angular_velocity.xyz[2];
-		// // Attitude error
-		// matrix::Quatf quat_from_lib = matrix::Quatf(v_att.q[0], v_att.q[1], v_att.q[2], v_att.q[3]);
-		// matrix::Eulerf q_to_euler(quat_from_lib);
-		// x0_data[3] = q_to_euler.phi();
-		// x0_data[4] = q_to_euler.theta();
-		// x0_data[5] = q_to_euler.psi();
+		// Debug
+		xg_data[0] = PX4_ISFINITE(_pos_sp(0)) ? _pos_sp(0) : 0.f;
+		xg_data[1] = -PX4_ISFINITE(_pos_sp(1)) ? _pos_sp(1) : 0.f;
+		xg_data[2] = -PX4_ISFINITE(_pos_sp(2)) ? _pos_sp(2) : 0.f;
 
+		xg_data[3] = 0.0f;
+		xg_data[4] = 0.0f;
+		xg_data[5] = 0.0f;
+
+		xg_data[6] = PX4_ISFINITE(_vel_sp(0)) ? _vel_sp(0) : 0.f;
+		xg_data[7] = -PX4_ISFINITE(_vel_sp(1)) ? _vel_sp(1) : 0.f;
+		xg_data[8] = -PX4_ISFINITE(_vel_sp(2)) ? _vel_sp(2) : 0.f;
+
+		xg_data[9] = 0.0f;
+		xg_data[10] = 0.0f;
+		xg_data[11] = PX4_ISFINITE(_yawspeed_sp) ? _yawspeed_sp : 0.f;
+		tiny_SetGoalReference(&mpc_work, Xref, Uref, xg_data, ug_data);
+		std::cout << "X Goal: \n" << xg_data[0] << " " << xg_data[1] << " " << xg_data[2] << " \n"
+			<< xg_data[3] << " " << xg_data[4] << " " << xg_data[5] << " \n"
+			<< xg_data[6] << " " << xg_data[7] << " " << xg_data[8] << " \n"
+			<< xg_data[9] << " " << xg_data[10] << " " << xg_data[11] << std::endl;
+		std::cout << "X0: \n" << x0_data[0] << " " << x0_data[1] << " " << x0_data[2] << " \n"
+			<< x0_data[3] << " " << x0_data[4] << " " << x0_data[5] << " \n"
+			<< x0_data[6] << " " << x0_data[7] << " " << x0_data[8] << " \n"
+			<< x0_data[9] << " " << x0_data[10] << " " << x0_data[11] << std::endl;
 
 		/* MPC solve */
 		tiny_UpdateLinearCost(&mpc_work);
 		tiny_SolveAdmm(&mpc_work);
+		std::cout << "Status: " << mpc_info.status_val << " | Iteration: " << mpc_info.iter << std::endl;
+		// std::cout << "Inputs: " << U[0].data[0] + u_hover << " " << U[0].data[1] + u_hover  << " " << U[0].data[2] + u_hover  << "  "<< U[0].data[3] + u_hover  << std::endl;
+		std::cout << "Inputs to Att Ctl: " << U[0].data[0] + u_hover << " " << X[1].data[5] << " " << X[1].data[11] << std::endl;
+		_thr_sp(0) = _thr_sp(1) = 0;
+		_thr_sp(2) = U[0].data[0] + u_hover;
+		_yaw_sp = X[1].data[5];
+		_yawspeed_sp = X[1].data[11];
 
-		// stop trajectory at the end
-		if (traj_idx >= traj_length - NHORIZON) {
-			en_traj = false;
-		}
-		else step += 1;
 
-		_yawspeed_sp = PX4_ISFINITE(_yawspeed_sp) ? _yawspeed_sp : 0.f;
-		_yaw_sp = PX4_ISFINITE(_yaw_sp) ? _yaw_sp : _yaw; // TODO: better way to disable yaw control
 	}
 
 	// There has to be a valid output acceleration and thrust setpoint otherwise something went wrong
-	return valid && _acc_sp.isAllFinite() && _thr_sp.isAllFinite();
+	return valid && _thr_sp.isAllFinite();
 }
 
 void PositionMPC::_positionControl()
@@ -383,13 +378,12 @@ bool PositionMPC::_inputValid()
 
 	// Every axis x, y, z needs to have some setpoint
 	for (int i = 0; i <= 2; i++) {
-		valid = valid && (PX4_ISFINITE(_pos_sp(i)) || PX4_ISFINITE(_vel_sp(i)) || PX4_ISFINITE(_acc_sp(i)));
+		valid = valid && (PX4_ISFINITE(_pos_sp(i)) || PX4_ISFINITE(_vel_sp(i)));
 	}
 
 	// x and y input setpoints always have to come in pairs
 	valid = valid && (PX4_ISFINITE(_pos_sp(0)) == PX4_ISFINITE(_pos_sp(1)));
 	valid = valid && (PX4_ISFINITE(_vel_sp(0)) == PX4_ISFINITE(_vel_sp(1)));
-	valid = valid && (PX4_ISFINITE(_acc_sp(0)) == PX4_ISFINITE(_acc_sp(1)));
 
 	// For each controlled state the estimate has to be valid
 	for (int i = 0; i <= 2; i++) {
