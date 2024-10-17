@@ -322,10 +322,8 @@ void SpacecraftPositionControl::Run()
 
 		if (_vehicle_control_mode.flag_control_position_enabled
 		    && (_setpoint.timestamp >= _time_position_control_enabled)) {
-			#ifndef MPC_CTL
 			_control.setThrustLimit(_param_mpc_thr_max.get());
 			_control.setVelocityLimits(_param_mpc_vel_max.get());
-			#endif
 
 
 			_control.setInputSetpoint(_setpoint);

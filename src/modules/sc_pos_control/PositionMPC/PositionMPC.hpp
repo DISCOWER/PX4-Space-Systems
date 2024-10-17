@@ -90,18 +90,16 @@ public:
 
 	/**
 	 * Set the maximum velocity to execute with feed forward and position control
-	 * @param vel_horizontal horizontal velocity limit
-	 * @param vel_up upwards velocity limit
-	 * @param vel_down downwards velocity limit
+	 * @param vel_max maximum velocity
 	 */
-	void setVelocityLimits(const float vel_horizontal, const float vel_up, float vel_down);
+	void setVelocityLimits(const float vel_max);
 
 	/**
 	 * Set the minimum and maximum collective normalized thrust [0,1] that can be output by the controller
 	 * @param min minimum thrust e.g. 0.1 or 0
 	 * @param max maximum thrust e.g. 0.9 or 1
 	 */
-	void setThrustLimits(const float min, const float max);
+	void setThrustLimit(const float max);
 
 	/**
 	 * Set margin that is kept for horizontal control when prioritizing vertical thrust
@@ -244,6 +242,7 @@ private:
 	matrix::Vector3f _vel_sp; /**< desired velocity */
 	matrix::Vector3f _acc_sp; /**< desired acceleration */
 	matrix::Vector3f _thr_sp; /**< desired thrust */
-	float _yaw_sp{}; /**< desired heading */
-	float _yawspeed_sp{}; /** desired yaw-speed */
+	matrix::Quatf _att_sp; /**< desired heading */
+	matrix::Quatf _att_goal; /**< setpoint for attitude setpoint (first prediction) */
+	matrix::Vector3f _ang_vel_sp; /** desired yaw-speed */
 };
