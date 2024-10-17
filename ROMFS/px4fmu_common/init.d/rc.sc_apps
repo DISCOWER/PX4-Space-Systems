@@ -17,20 +17,28 @@ ekf2 start &
 #
 sc_control_allocator start
 
-#
-# Start Spacecraft Rate Controller.
-#
-sc_rate_control start
+if param compare MPC_ENABLED 0
+then
+	#
+	# Start Spacecraft Rate Controller.
+	#
+	sc_rate_control start
 
-#
-# Start Spacecraft Attitude Controller.
-#
-sc_att_control start
+	#
+	# Start Spacecraft Attitude Controller.
+	#
+	sc_att_control start
 
-#
-# Start Spacecraft Position Controller.
-#
-sc_pos_control start
+	#
+	# Start Spacecraft Position Controller.
+	#
+	sc_pos_control start
+else
+	#
+	# Start Spacecraft MPC Controller.
+	#
+	sc_mpc_control start
+fi
 
 # Start Space Robot Thruster Controller
 sc_external_wrench start

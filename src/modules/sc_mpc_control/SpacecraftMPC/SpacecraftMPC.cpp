@@ -32,15 +32,13 @@
  ****************************************************************************/
 
 /**
- * @file PositionMPC.cpp
+ * @file SpacecraftMPC.cpp
  */
 
-#include "PositionMPC.hpp"
-#include "ControlMath.hpp"
+#include "SpacecraftMPC.hpp"
 #include <float.h>
 #include <mathlib/mathlib.h>
 #include <px4_platform_common/defines.h>
-#include <geo/geo.h>
 #include <lib/tinympc/tinympc.h>
 #include <iostream>
 
@@ -51,8 +49,6 @@
 #define NSTATES 12   // no. of states (error state)
 #define NINPUTS 4    // no. of controls
 #define NHORIZON 20   // horizon steps (NHORIZON states and NHORIZON-1 controls)
-
-#define PUBLISH_RATE 1 // 1 for true, 0 for false. If false, publishes Torque and Thrust setpoints at 500Hz
 
 #include "params/params_500hz.h"
 // #include "params/traj_fig8.h"
@@ -103,9 +99,9 @@ static tiny_AdmmInfo mpc_info;
 static tiny_AdmmSolution mpc_soln;
 static tiny_AdmmWorkspace mpc_work;
 
-const trajectory_setpoint_s PositionMPC::empty_trajectory_setpoint  = {0, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN, NAN}, {NAN, NAN, NAN}, NAN, NAN};
+const trajectory_setpoint_s SpacecraftMPC::empty_trajectory_setpoint  = {0, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN}, {NAN, NAN, NAN, NAN}, {NAN, NAN, NAN}, NAN, NAN};
 
-PositionMPC::PositionMPC(){
+SpacecraftMPC::SpacecraftMPC(){
 	// Initialize MPC
 	tiny_InitModel(&mpc_model, NSTATES, NINPUTS, NHORIZON, 0, 0, DT);
 	tiny_InitSettings(&stgs);
@@ -148,44 +144,34 @@ PositionMPC::PositionMPC(){
 	stgs.check_termination = 2;
 	stgs.tol_abs_dual = 5e-2;
 	stgs.tol_abs_prim = 5e-2;
+
+	// Initialize enabled control components
+	_pos_en = 0.0f;
+	_att_en = 0.0f;
+	_omg_en = 0.0f;
 }
 
-void PositionMPC::setVelocityGains(const matrix::Vector3f &P, const matrix::Vector3f &I, const matrix::Vector3f &D)
+
+
+void SpacecraftMPC::setVelocityLimits(const float vel_max)
 {
-	_gain_vel_p = P;
-	_gain_vel_i = I;
-	_gain_vel_d = D;
+
 }
 
-void PositionMPC::setVelocityLimits(const float vel_max)
+void SpacecraftMPC::setThrustLimit(const float max)
 {
-	_lim_vel_horizontal = vel_max;
-	_lim_vel_up = vel_max;
-	_lim_vel_down = vel_max;
+
 }
 
-void PositionMPC::setThrustLimit(const float max)
-{
-	// make sure there's always enough thrust vector length to infer the attitude
-	_lim_thr_min = -max;
-	_lim_thr_max = max;
-}
-
-void PositionMPC::setHorizontalThrustMargin(const float margin)
-{
-	_lim_thr_xy_margin = margin;
-}
-
-void PositionMPC::setInputSetpoint(const trajectory_setpoint_s &setpoint)
+void SpacecraftMPC::setInputSetpoint(const trajectory_setpoint_s &setpoint)
 {
 	_pos_sp = matrix::Vector3f(setpoint.position);
 	_vel_sp = matrix::Vector3f(setpoint.velocity);
-	_acc_sp = matrix::Vector3f(setpoint.acceleration);
 	_att_sp = matrix::Quatf(setpoint.attitude);
 	_ang_vel_sp = matrix::Vector3f(setpoint.angular_velocity);
 }
 
-bool PositionMPC::update(const float dt)
+bool SpacecraftMPC::update(const float dt)
 {
 	bool valid = _inputValid();
 
@@ -254,7 +240,7 @@ bool PositionMPC::update(const float dt)
 	return valid && _thr_sp.isAllFinite();
 }
 
-bool PositionMPC::_inputValid()
+bool SpacecraftMPC::_inputValid()
 {
 	bool valid = true;
 
@@ -275,7 +261,7 @@ bool PositionMPC::_inputValid()
 	return valid;
 }
 
-void PositionMPC::getLocalPositionSetpoint(vehicle_local_position_setpoint_s &local_position_setpoint) const
+void SpacecraftMPC::getLocalPositionSetpoint(vehicle_local_position_setpoint_s &local_position_setpoint) const
 {
 	local_position_setpoint.x = _pos_sp(0);
 	local_position_setpoint.y = _pos_sp(1);
@@ -289,7 +275,7 @@ void PositionMPC::getLocalPositionSetpoint(vehicle_local_position_setpoint_s &lo
 	_thr_sp.copyTo(local_position_setpoint.thrust);
 }
 
-void PositionMPC::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
+void SpacecraftMPC::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
 {
 	// Set thrust setpoint
 	attitude_setpoint.thrust_body[0] = _thr_sp(0);

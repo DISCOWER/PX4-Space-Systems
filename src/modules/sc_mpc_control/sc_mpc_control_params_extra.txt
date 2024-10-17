@@ -1,0 +1,215 @@
+/**
+ * MPC Maximum position bound on world X axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_P_X, 20.0f);
+
+/**
+ * MPC Maximum position bound on world Y axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_P_Y, 20.0f);
+
+/**
+ * MPC Maximum position bound on world Z axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_P_Z, 20.0f);
+
+/**
+ * MPC Maximum velocity bound on world X axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_V_X, 20.0f);
+
+/**
+ * MPC Maximum velocity bound on world Y axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_V_Y, 20.0f);
+
+/**
+ * MPC Maximum velocity bound on world Z axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_V_Z, 20.0f);
+
+/**
+ * MPC Maximum attitude bound on X axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_ATT_X, 20.0f);
+
+/**
+ * MPC Maximum attitude bound on world Y axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_ATT_Y, 20.0f);
+
+/**
+ * MPC Maximum attitude bound on world Z axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_ATT_Z, 20.0f);
+
+/**
+ * MPC Maximum angular velocity bound on X axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_OMG_X, 20.0f);
+
+/**
+ * MPC Maximum angular velocity bound on Y axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_OMG_Y, 20.0f);
+
+/**
+ * MPC Maximum angular velocity bound on Z axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_XB_OMG_Z, 20.0f);
+
+/**
+ * MPC Maximum force bound on X axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_UB_F_X, 20.0f);
+
+/**
+ * MPCMaximum force bound on Y axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_UB_F_Y, 20.0f);
+
+/**
+ * MPC Maximum force bound on Z axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_UB_F_Z, 20.0f);
+
+/**
+ * MPC Maximum torque bound on X axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_UB_T_X, 20.0f);
+
+/**
+ * MPC Maximum torque bound on Y axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_UB_T_Y, 20.0f);
+
+/**
+ * MPC Maximum torque bound on Z axis
+ *
+ *
+ * @min 0
+ * @max 200
+ * @decimal 1
+ * @increment 1.0
+ * @group Spacecraft MPC
+ */
+PARAM_DEFINE_FLOAT(SPC_MPC_UB_T_Z, 20.0f);
