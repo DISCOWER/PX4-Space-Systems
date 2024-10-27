@@ -22,7 +22,7 @@ param set SPC_MPC_ENABLED 1
 
 if param compare SPC_MPC_ENABLED 0
 then
-	echo "INFO [init] Spacecraft MPC Controller is disabled."
+	echo "INFO  [init] Spacecraft MPC Controller is disabled."
 	#
 	# Start Spacecraft Rate Controller.
 	#

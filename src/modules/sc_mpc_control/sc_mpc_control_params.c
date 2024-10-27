@@ -38,6 +38,7 @@
  * @min 0
  * @max 1
  * @group Spacecraft MPC
+ * @reboot_required true
  */
 PARAM_DEFINE_INT32(SPC_MPC_ENABLED, 0);
 
