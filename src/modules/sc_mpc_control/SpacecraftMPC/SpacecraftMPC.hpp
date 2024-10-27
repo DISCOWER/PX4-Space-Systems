@@ -67,6 +67,14 @@
  * 	If there is a position/velocity- and thrust-setpoint present, then
  *  the thrust-setpoint is ommitted and recomputed from position-velocity-PID-loop.
  */
+
+struct SpacecraftMPCStates {
+	matrix::Vector3f position;
+	matrix::Vector3f velocity;
+	matrix::Quatf attitude;
+	matrix::Vector3f angular_velocity;
+};
+
 class SpacecraftMPC
 {
 public:
@@ -79,7 +87,7 @@ public:
 	 * @param P 3D vector of proportional gains for x,y,z axis
 	 */
 	void setControlWeights(const matrix::Vector3f &P, const matrix::Vector3f &V,
-			const matrix::Vector3f &ATT, const matrix::Vector3f &OMG,
+			const matrix::Vector4f &ATT, const matrix::Vector3f &OMG,
 			const matrix::Vector3f &F, const matrix::Vector3f &T)
 	{
 		_weight_pos = P;
@@ -169,7 +177,7 @@ private:
 	// Gains
 	matrix::Vector3f _weight_pos; ///< Position weight
 	matrix::Vector3f _weight_vel; ///< Velocity weight
-	matrix::Vector3f _weight_att; ///< Attitude weight
+	matrix::Vector4f _weight_att; ///< Attitude weight
 	matrix::Vector3f _weight_omg; ///< Angular velocity (omega) mpc weight
 
 	// Multipliers - enable/disable subcomponents of the controller
@@ -195,4 +203,9 @@ private:
 	// Outputs
 	matrix::Vector3f _thr_sp; /**< desired thrust */
 	matrix::Vector3f _trq_sp; /**< desired torque */
+	matrix::Quatf _att_goal; /**< desired heading */
+
+	// Limits
+	float _lim_thr_min; /**< minimum thrust */
+	float _lim_thr_max; /**< minimum thrust */
 };

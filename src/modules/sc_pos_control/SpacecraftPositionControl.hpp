@@ -38,7 +38,6 @@
 #pragma once
 
 #include "PositionControl/PositionControl.hpp"
-#include "PositionMPC/PositionMPC.hpp"
 
 #include <drivers/drv_hrt.h>
 #include <lib/controllib/blocks.hpp>
@@ -66,8 +65,6 @@
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
-
-#define MPC_CTL
 
 using namespace time_literals;
 
@@ -145,11 +142,7 @@ private:
 	float yaw_rate;
 	bool stabilized_pos_sp_initialized{false};
 
-	#ifndef MPC_CTL
 	ScPositionControl _control;  /**< class for core PID position control */
-	#else
-	PositionMPC _control;  /**< class for core PID position control */
-	#endif
 
 	hrt_abstime _last_warn{0}; /**< timer when the last warn message was sent out */
 

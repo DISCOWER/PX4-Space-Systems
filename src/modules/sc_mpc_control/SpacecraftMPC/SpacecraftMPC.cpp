@@ -256,7 +256,6 @@ bool SpacecraftMPC::_inputValid()
 	valid = valid && PX4_ISFINITE(_vel(0)) && PX4_ISFINITE(_vel(1)) && PX4_ISFINITE(_vel(2));
 	valid = valid && PX4_ISFINITE(_ang_vel(0)) && PX4_ISFINITE(_ang_vel(1)) && PX4_ISFINITE(_ang_vel(2));
 	valid = valid && PX4_ISFINITE(_att(0)) && PX4_ISFINITE(_att(1)) && PX4_ISFINITE(_att(2)) && PX4_ISFINITE(_att(3));
-	valid = valid && PX4_ISFINITE(_yaw);
 
 	return valid;
 }
@@ -271,7 +270,6 @@ void SpacecraftMPC::getLocalPositionSetpoint(vehicle_local_position_setpoint_s &
 	local_position_setpoint.vx = _vel_sp(0);
 	local_position_setpoint.vy = _vel_sp(1);
 	local_position_setpoint.vz = _vel_sp(2);
-	_acc_sp.copyTo(local_position_setpoint.acceleration);
 	_thr_sp.copyTo(local_position_setpoint.thrust);
 }
 

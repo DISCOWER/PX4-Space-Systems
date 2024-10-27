@@ -4,7 +4,6 @@
 #
 
 set VEHICLE_TYPE sc
-set MPC_ENABLED 1
 
 # MAV_TYPE_QUADROTOR 2
 #param set-default MAV_TYPE 12

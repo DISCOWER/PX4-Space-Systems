@@ -32,7 +32,6 @@
 ############################################################################
 
 add_subdirectory(PositionControl)
-add_subdirectory(PositionMPC)
 
 px4_add_module(
 	MODULE modules__sc_pos_control
@@ -43,7 +42,6 @@ px4_add_module(
 		SpacecraftPositionControl.hpp
 	DEPENDS
 		SpacecraftPositionControl
-		PositionMPC
 		controllib
 		geo
 		SlewRate

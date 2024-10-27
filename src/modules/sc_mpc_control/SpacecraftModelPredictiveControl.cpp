@@ -31,32 +31,27 @@
  *
  ****************************************************************************/
 
-#include "SpacecraftPositionControl.hpp"
+#include "SpacecraftModelPredictiveControl.hpp"
 
 #include <float.h>
 #include <px4_platform_common/events.h>
-#include "PositionControl/ControlMath.hpp"
 
 using namespace matrix;
 
-SpacecraftPositionControl::SpacecraftPositionControl() :
-	SuperBlock(nullptr, "SPC"),
+SpacecraftModelPredictiveControl::SpacecraftModelPredictiveControl() :
 	ModuleParams(nullptr),
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers),
-	_vehicle_attitude_setpoint_pub(ORB_ID(vehicle_attitude_setpoint)),
-	_vel_x_deriv(this, "VELD"),
-	_vel_y_deriv(this, "VELD"),
-	_vel_z_deriv(this, "VELD")
+	_vehicle_attitude_setpoint_pub(ORB_ID(vehicle_attitude_setpoint))
 {
 	parameters_update(true);
 }
 
-SpacecraftPositionControl::~SpacecraftPositionControl()
+SpacecraftModelPredictiveControl::~SpacecraftModelPredictiveControl()
 {
 	perf_free(_cycle_perf);
 }
 
-bool SpacecraftPositionControl::init()
+bool SpacecraftModelPredictiveControl::init()
 {
 	if (!_local_pos_sub.registerCallback()) {
 		PX4_ERR("callback registration failed");
@@ -69,7 +64,7 @@ bool SpacecraftPositionControl::init()
 	return true;
 }
 
-void SpacecraftPositionControl::parameters_update(bool force)
+void SpacecraftModelPredictiveControl::parameters_update(bool force)
 {
 	// check for parameter updates
 	if (_parameter_update_sub.updated() || force) {
@@ -77,89 +72,22 @@ void SpacecraftPositionControl::parameters_update(bool force)
 		parameter_update_s pupdate;
 		_parameter_update_sub.copy(&pupdate);
 
-		// update parameters from storage
-		ModuleParams::updateParams();
-		SuperBlock::updateParams();
-
-		int num_changed = 0;
-
-		if (_param_sys_vehicle_resp.get() >= 0.f) {
-			// make it less sensitive at the lower end
-			float responsiveness = _param_sys_vehicle_resp.get() * _param_sys_vehicle_resp.get();
-
-			num_changed += _param_mpc_acc.commit_no_notification(math::lerp(1.f, 15.f, responsiveness));
-			num_changed += _param_mpc_acc_max.commit_no_notification(math::lerp(2.f, 15.f, responsiveness));
-			num_changed += _param_mpc_man_y_max.commit_no_notification(math::lerp(80.f, 450.f, responsiveness));
-
-			if (responsiveness > 0.6f) {
-				num_changed += _param_mpc_man_y_tau.commit_no_notification(0.f);
-
-			} else {
-				num_changed += _param_mpc_man_y_tau.commit_no_notification(math::lerp(0.5f, 0.f, responsiveness / 0.6f));
-			}
-
-			num_changed += _param_mpc_jerk_max.commit_no_notification(math::lerp(2.f, 50.f, responsiveness));
-			num_changed += _param_mpc_jerk_auto.commit_no_notification(math::lerp(1.f, 25.f, responsiveness));
-		}
-
-		if (_param_mpc_vel_all.get() >= 0.f) {
-			float all_vel = _param_mpc_vel_all.get();
-			num_changed += _param_mpc_vel_manual.commit_no_notification(all_vel);
-			num_changed += _param_mpc_vel_cruise.commit_no_notification(all_vel);
-			num_changed += _param_mpc_vel_max.commit_no_notification(all_vel);
-		}
-
-		if (num_changed > 0) {
-			param_notify_changes();
-		}
-
-		// Set PI and PID gains, as well as anti-windup limits
-		#ifndef MPC_CTL
-		_control.setPositionGains(
-			Vector3f(_param_mpc_pos_p.get(), _param_mpc_pos_p.get(), _param_mpc_pos_p.get()),
-			Vector3f(_param_mpc_pos_i.get(), _param_mpc_pos_i.get(), _param_mpc_pos_i.get()));
-		_control.setPositionIntegralLimits(_param_mpc_pos_i_lim.get());
-		_control.setVelocityIntegralLimits(_param_mpc_vel_i_lim.get());
-		#else
-		_control.setPositionGains(Vector3f(_param_mpc_pos_p.get(), _param_mpc_pos_p.get(), _param_mpc_pos_p.get()));
-		#endif
-
-		_control.setVelocityGains(
-			Vector3f(_param_mpc_vel_p_acc.get(), _param_mpc_vel_p_acc.get(), _param_mpc_vel_p_acc.get()),
-			Vector3f(_param_mpc_vel_i_acc.get(), _param_mpc_vel_i_acc.get(), _param_mpc_vel_i_acc.get()),
-			Vector3f(_param_mpc_vel_d_acc.get(), _param_mpc_vel_d_acc.get(), _param_mpc_vel_d_acc.get()));
-
-		// Check that the design parameters are inside the absolute maximum constraints
-		if (_param_mpc_vel_cruise.get() > _param_mpc_vel_max.get()) {
-			_param_mpc_vel_cruise.set(_param_mpc_vel_max.get());
-			_param_mpc_vel_cruise.commit();
-			mavlink_log_critical(&_mavlink_log_pub, "Cruise speed has been constrained by max speed\t");
-			/* EVENT
-			 * @description <param>SPC_VEL_CRUISE</param> is set to {1:.0}.
-			 */
-			events::send<float>(events::ID("sc_pos_ctrl_cruise_set"), events::Log::Warning,
-					    "Cruise speed has been constrained by maximum speed", _param_mpc_vel_max.get());
-		}
-
-		if (_param_mpc_vel_manual.get() > _param_mpc_vel_max.get()) {
-			_param_mpc_vel_manual.set(_param_mpc_vel_max.get());
-			_param_mpc_vel_manual.commit();
-			mavlink_log_critical(&_mavlink_log_pub, "Manual speed has been constrained by max speed\t");
-			/* EVENT
-			 * @description <param>SPC_VEL_MANUAL</param> is set to {1:.0}.
-			 */
-			events::send<float>(events::ID("sc_pos_ctrl_man_vel_set"), events::Log::Warning,
-					    "Manual speed has been constrained by maximum speed", _param_mpc_vel_max.get());
-		}
-
-		yaw_rate = math::radians(_param_mpc_man_y_max.get());
+		// Set weights
+		// Position control gains
+		_pos_gain = {_param_spc_mpc_q_pos_x.get(), _param_spc_mpc_q_pos_y.get(), _param_spc_mpc_q_pos_z.get()};
+		_vel_gain = {_param_spc_mpc_q_vel_x.get(), _param_spc_mpc_q_vel_y.get(), _param_spc_mpc_q_vel_z.get()};
+		_att_gain = {_param_spc_mpc_q_att_x.get(), _param_spc_mpc_q_att_y.get(), _param_spc_mpc_q_att_z.get(), _param_spc_mpc_q_att_w.get()};
+		_omg_gain = {_param_spc_mpc_q_omg_x.get(), _param_spc_mpc_q_omg_y.get(), _param_spc_mpc_q_omg_z.get()};
+		_force_gain = {_param_spc_mpc_r_f_x.get(), _param_spc_mpc_r_f_y.get(), _param_spc_mpc_r_f_z.get()};
+		_torque_gain = {_param_spc_mpc_r_t_x.get(), _param_spc_mpc_r_t_y.get(), _param_spc_mpc_r_t_z.get()};
+		_control.setControlWeights(_pos_gain, _vel_gain, _att_gain, _omg_gain, _force_gain, _torque_gain);
 	}
 }
 
-PositionControlStates SpacecraftPositionControl::set_vehicle_states(const vehicle_local_position_s
+SpacecraftMPCStates SpacecraftModelPredictiveControl::set_vehicle_states(const vehicle_local_position_s
 		&vehicle_local_position, const vehicle_attitude_s &vehicle_attitude)
 {
-	PositionControlStates states;
+	SpacecraftMPCStates states;
 
 	const Vector2f position_xy(vehicle_local_position.x, vehicle_local_position.y);
 
@@ -178,46 +106,18 @@ PositionControlStates SpacecraftPositionControl::set_vehicle_states(const vehicl
 		states.position(2) = NAN;
 	}
 
-	const Vector2f velocity_xy(vehicle_local_position.vx, vehicle_local_position.vy);
-
-	if (vehicle_local_position.v_xy_valid && velocity_xy.isAllFinite()) {
-		states.velocity.xy() = velocity_xy;
-		states.acceleration(0) = _vel_x_deriv.update(velocity_xy(0));
-		states.acceleration(1) = _vel_y_deriv.update(velocity_xy(1));
-
-	} else {
-		states.velocity(0) = states.velocity(1) = NAN;
-		states.acceleration(0) = states.acceleration(1) = NAN;
-
-		// reset derivatives to prevent acceleration spikes when regaining velocity
-		_vel_x_deriv.reset();
-		_vel_y_deriv.reset();
-	}
-
-	if (PX4_ISFINITE(vehicle_local_position.vz) && vehicle_local_position.v_z_valid) {
-		states.velocity(2) = vehicle_local_position.vz;
-		states.acceleration(2) = _vel_z_deriv.update(states.velocity(2));
-
-	} else {
-		states.velocity(2) = NAN;
-		states.acceleration(2) = NAN;
-
-		// reset derivative to prevent acceleration spikes when regaining velocity
-		_vel_z_deriv.reset();
-	}
-
 	if (PX4_ISFINITE(vehicle_attitude.q[0]) && PX4_ISFINITE(vehicle_attitude.q[1]) && PX4_ISFINITE(vehicle_attitude.q[2])
 	    && PX4_ISFINITE(vehicle_attitude.q[3])) {
-		states.quaternion = Quatf(vehicle_attitude.q);
+		states.attitude = Quatf(vehicle_attitude.q);
 
 	} else {
-		states.quaternion = Quatf();
+		states.attitude = Quatf();
 	}
 
 	return states;
 }
 
-void SpacecraftPositionControl::Run()
+void SpacecraftModelPredictiveControl::Run()
 {
 	if (should_exit()) {
 		_local_pos_sub.unregisterCallback();
@@ -240,9 +140,6 @@ void SpacecraftPositionControl::Run()
 			math::constrain(((vehicle_local_position.timestamp_sample - _time_stamp_last_loop) * 1e-6f), 0.002f, 0.04f);
 		_time_stamp_last_loop = vehicle_local_position.timestamp_sample;
 
-		// set _dt in controllib Block for BlockDerivative
-		setDt(dt);
-
 		if (_vehicle_control_mode_sub.updated()) {
 			const bool previous_position_control_enabled = _vehicle_control_mode.flag_control_position_enabled;
 
@@ -252,59 +149,16 @@ void SpacecraftPositionControl::Run()
 
 				} else if (previous_position_control_enabled && !_vehicle_control_mode.flag_control_position_enabled) {
 					// clear existing setpoint when controller is no longer active
-					_setpoint = ScPositionControl::empty_trajectory_setpoint;
+					_setpoint = SpacecraftMPC::empty_trajectory_setpoint;
 				}
 			}
 		}
 
-		// TODO: check if setpoint is different than the previous one and reset integral then
-		// 		 _control.resetIntegral();
 		_trajectory_setpoint_sub.update(&_setpoint);
 		_vehicle_attitude_sub.update(&v_att);
 		_vehicle_angular_velocity_sub.update(&angular_velocity);
 
-		// adjust existing (or older) setpoint with any EKF reset deltas
-		if ((_setpoint.timestamp != 0) && (_setpoint.timestamp < vehicle_local_position.timestamp)) {
-			if (vehicle_local_position.vxy_reset_counter != _vxy_reset_counter) {
-				_setpoint.velocity[0] += vehicle_local_position.delta_vxy[0];
-				_setpoint.velocity[1] += vehicle_local_position.delta_vxy[1];
-			}
-
-			if (vehicle_local_position.vz_reset_counter != _vz_reset_counter) {
-				_setpoint.velocity[2] += vehicle_local_position.delta_vz;
-			}
-
-			if (vehicle_local_position.xy_reset_counter != _xy_reset_counter) {
-				_setpoint.position[0] += vehicle_local_position.delta_xy[0];
-				_setpoint.position[1] += vehicle_local_position.delta_xy[1];
-			}
-
-			if (vehicle_local_position.z_reset_counter != _z_reset_counter) {
-				_setpoint.position[2] += vehicle_local_position.delta_z;
-			}
-
-			if (vehicle_local_position.heading_reset_counter != _heading_reset_counter) {
-				_setpoint.yaw = wrap_pi(_setpoint.yaw + vehicle_local_position.delta_heading);
-			}
-		}
-
-		if (vehicle_local_position.vxy_reset_counter != _vxy_reset_counter) {
-			_vel_x_deriv.reset();
-			_vel_y_deriv.reset();
-		}
-
-		if (vehicle_local_position.vz_reset_counter != _vz_reset_counter) {
-			_vel_z_deriv.reset();
-		}
-
-		// save latest reset counters
-		_vxy_reset_counter = vehicle_local_position.vxy_reset_counter;
-		_vz_reset_counter = vehicle_local_position.vz_reset_counter;
-		_xy_reset_counter = vehicle_local_position.xy_reset_counter;
-		_z_reset_counter = vehicle_local_position.z_reset_counter;
-		_heading_reset_counter = vehicle_local_position.heading_reset_counter;
-
-		PositionControlStates states{set_vehicle_states(vehicle_local_position, v_att)};
+		SpacecraftMPCStates states{set_vehicle_states(vehicle_local_position, v_att)};
 
 		poll_manual_setpoint(dt, vehicle_local_position, v_att);
 
@@ -322,21 +176,17 @@ void SpacecraftPositionControl::Run()
 
 		if (_vehicle_control_mode.flag_control_position_enabled
 		    && (_setpoint.timestamp >= _time_position_control_enabled)) {
-			_control.setThrustLimit(_param_mpc_thr_max.get());
-			_control.setVelocityLimits(_param_mpc_vel_max.get());
+			_control.setThrustLimit(1.4f);
+			_control.setVelocityLimits(0.2f);
 
 
 			_control.setInputSetpoint(_setpoint);
 
-			_control.setState(states);
-			_control.setAttitudeStates(v_att, angular_velocity);
+			_control.setState(states, v_att, angular_velocity);
 
 			// Run position control
 			if (!_control.update(dt)) {
 				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, true));
-				#ifndef MPC_CTL
-				_control.setVelocityLimits(_param_mpc_vel_max.get());
-				#endif
 				_control.update(dt);
 			}
 
@@ -354,7 +204,7 @@ void SpacecraftPositionControl::Run()
 	perf_end(_cycle_perf);
 }
 
-void SpacecraftPositionControl::publishLocalPositionSetpoint(vehicle_attitude_setpoint_s &_att_sp)
+void SpacecraftModelPredictiveControl::publishLocalPositionSetpoint(vehicle_attitude_setpoint_s &_att_sp)
 {
 	// complete the setpoint data structure
 	vehicle_local_position_setpoint_s local_position_setpoint{};
@@ -377,7 +227,7 @@ void SpacecraftPositionControl::publishLocalPositionSetpoint(vehicle_attitude_se
 	_local_pos_sp_pub.publish(local_position_setpoint);
 }
 
-void SpacecraftPositionControl::poll_manual_setpoint(const float dt,
+void SpacecraftModelPredictiveControl::poll_manual_setpoint(const float dt,
 		const vehicle_local_position_s &vehicle_local_position,
 		const vehicle_attitude_s &_vehicle_att)
 {
@@ -444,8 +294,8 @@ void SpacecraftPositionControl::poll_manual_setpoint(const float dt,
 	}
 }
 
-trajectory_setpoint_s SpacecraftPositionControl::generateFailsafeSetpoint(const hrt_abstime &now,
-		const PositionControlStates &states, bool warn)
+trajectory_setpoint_s SpacecraftModelPredictiveControl::generateFailsafeSetpoint(const hrt_abstime &now,
+		const SpacecraftMPCStates &states, bool warn)
 {
 	// rate limit the warnings
 	warn = warn && (now - _last_warn) > 2_s;
@@ -455,7 +305,7 @@ trajectory_setpoint_s SpacecraftPositionControl::generateFailsafeSetpoint(const 
 		_last_warn = now;
 	}
 
-	trajectory_setpoint_s failsafe_setpoint = ScPositionControl::empty_trajectory_setpoint;
+	trajectory_setpoint_s failsafe_setpoint = SpacecraftMPC::empty_trajectory_setpoint;
 	failsafe_setpoint.timestamp = now;
 
 	failsafe_setpoint.velocity[0] = failsafe_setpoint.velocity[1] = failsafe_setpoint.velocity[2] = 0.f;
@@ -467,9 +317,9 @@ trajectory_setpoint_s SpacecraftPositionControl::generateFailsafeSetpoint(const 
 	return failsafe_setpoint;
 }
 
-int SpacecraftPositionControl::task_spawn(int argc, char *argv[])
+int SpacecraftModelPredictiveControl::task_spawn(int argc, char *argv[])
 {
-	SpacecraftPositionControl *instance = new SpacecraftPositionControl();
+	SpacecraftModelPredictiveControl *instance = new SpacecraftModelPredictiveControl();
 
 	if (instance) {
 		_object.store(instance);
@@ -490,12 +340,12 @@ int SpacecraftPositionControl::task_spawn(int argc, char *argv[])
 	return PX4_ERROR;
 }
 
-int SpacecraftPositionControl::custom_command(int argc, char *argv[])
+int SpacecraftModelPredictiveControl::custom_command(int argc, char *argv[])
 {
 	return print_usage("unknown command");
 }
 
-int SpacecraftPositionControl::print_usage(const char *reason)
+int SpacecraftModelPredictiveControl::print_usage(const char *reason)
 {
 	if (reason) {
 		PX4_WARN("%s\n", reason);
@@ -519,7 +369,7 @@ int SpacecraftPositionControl::print_usage(const char *reason)
 	return 0;
 }
 
-extern "C" __EXPORT int sc_pos_control_main(int argc, char *argv[])
+extern "C" __EXPORT int sc_mpc_control_main(int argc, char *argv[])
 {
-	return SpacecraftPositionControl::main(argc, argv);
+	return SpacecraftModelPredictiveControl::main(argc, argv);
 }

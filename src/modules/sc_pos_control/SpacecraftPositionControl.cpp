@@ -114,15 +114,11 @@ void SpacecraftPositionControl::parameters_update(bool force)
 		}
 
 		// Set PI and PID gains, as well as anti-windup limits
-		#ifndef MPC_CTL
 		_control.setPositionGains(
 			Vector3f(_param_mpc_pos_p.get(), _param_mpc_pos_p.get(), _param_mpc_pos_p.get()),
 			Vector3f(_param_mpc_pos_i.get(), _param_mpc_pos_i.get(), _param_mpc_pos_i.get()));
 		_control.setPositionIntegralLimits(_param_mpc_pos_i_lim.get());
 		_control.setVelocityIntegralLimits(_param_mpc_vel_i_lim.get());
-		#else
-		_control.setPositionGains(Vector3f(_param_mpc_pos_p.get(), _param_mpc_pos_p.get(), _param_mpc_pos_p.get()));
-		#endif
 
 		_control.setVelocityGains(
 			Vector3f(_param_mpc_vel_p_acc.get(), _param_mpc_vel_p_acc.get(), _param_mpc_vel_p_acc.get()),
@@ -334,9 +330,7 @@ void SpacecraftPositionControl::Run()
 			// Run position control
 			if (!_control.update(dt)) {
 				_control.setInputSetpoint(generateFailsafeSetpoint(vehicle_local_position.timestamp_sample, states, true));
-				#ifndef MPC_CTL
 				_control.setVelocityLimits(_param_mpc_vel_max.get());
-				#endif
 				_control.update(dt);
 			}
 

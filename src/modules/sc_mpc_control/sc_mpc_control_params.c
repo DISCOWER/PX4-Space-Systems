@@ -37,18 +37,16 @@
  *
  * @min 0
  * @max 1
- * @decimal 1
- * @increment 1.0
  * @group Spacecraft MPC
  */
-PARAM_DEFINE_INT32(MPC_ENABLED, 1.0);
+PARAM_DEFINE_INT32(SPC_MPC_ENABLED, 0);
 
 /**
  * MPC Weight on position error along X axis
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -60,7 +58,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_POS_X, 100.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -72,7 +70,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_POS_Y, 100.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -84,7 +82,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_POS_Z, 100.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -96,7 +94,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_VEL_X, 50.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -108,7 +106,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_VEL_Y, 50.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -121,7 +119,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_VEL_Z, 50.0f);
  * If quaternion, acts on X component
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -134,7 +132,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_ATT_X, 300.0f);
  * If quaternion, acts on Y component
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -147,7 +145,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_ATT_Y, 300.0f);
  * If quaternion, acts on Z component
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -159,7 +157,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_ATT_Z, 300.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -171,24 +169,24 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_ATT_W, 300.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
  */
-PARAM_DEFINE_FLOAT(SPC_MPC_Q_OMEGA_X, 100.0f);
+PARAM_DEFINE_FLOAT(SPC_MPC_Q_OMG_X, 100.0f);
 
 /**
  * MPC Weight on angular velocity error along Y axis
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
  */
-PARAM_DEFINE_FLOAT(SPC_MPC_Q_OMEGA_Y, 100.0f);
+PARAM_DEFINE_FLOAT(SPC_MPC_Q_OMG_Y, 100.0f);
 
 
 /**
@@ -196,19 +194,19 @@ PARAM_DEFINE_FLOAT(SPC_MPC_Q_OMEGA_Y, 100.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
  */
-PARAM_DEFINE_FLOAT(SPC_MPC_Q_OMEGA_Z, 100.0f);
+PARAM_DEFINE_FLOAT(SPC_MPC_Q_OMG_Z, 100.0f);
 
 /**
  * MPC Weight on force input along X axis
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -220,7 +218,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_R_F_X, 20.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -232,7 +230,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_R_F_Y, 20.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -244,7 +242,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_R_F_Z, 20.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -256,7 +254,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_R_T_X, 20.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
@@ -268,7 +266,7 @@ PARAM_DEFINE_FLOAT(SPC_MPC_R_T_Y, 20.0f);
  *
  *
  * @min 0
- * @max 200
+ * @max 500
  * @decimal 1
  * @increment 1.0
  * @group Spacecraft MPC
