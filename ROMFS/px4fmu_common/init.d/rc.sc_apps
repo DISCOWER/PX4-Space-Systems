@@ -17,9 +17,6 @@ ekf2 start &
 #
 sc_control_allocator start
 
-# Control type:
-param set SPC_MPC_ENABLED 1
-
 if param compare SPC_MPC_ENABLED 0
 then
 	echo "INFO  [init] Spacecraft MPC Controller is disabled."
@@ -38,7 +35,7 @@ then
 	#
 	sc_pos_control start
 else
-	echo "INFO [init] Spacecraft MPC Controller is enabled!"
+	echo "INFO  [init] Spacecraft MPC Controller is enabled!"
 	#
 	# Start Spacecraft MPC Controller.
 	#
