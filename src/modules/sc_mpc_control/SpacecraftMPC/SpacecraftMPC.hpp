@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /**
- * @file PositionMPC.hpp
+ * @file SpacecraftMPC.hpp
  *
  * A cascaded position controller for position/velocity control only.
  */
@@ -67,26 +67,41 @@
  * 	If there is a position/velocity- and thrust-setpoint present, then
  *  the thrust-setpoint is ommitted and recomputed from position-velocity-PID-loop.
  */
-class PositionMPC
+
+struct SpacecraftMPCStates {
+	matrix::Vector3f position;
+	matrix::Vector3f velocity;
+	matrix::Quatf attitude;
+	matrix::Vector3f angular_velocity;
+};
+
+class SpacecraftMPC
 {
 public:
 
-	PositionMPC();
-	~PositionMPC() = default;
+	SpacecraftMPC();
+	~SpacecraftMPC() = default;
 
 	/**
 	 * Set the position control gains
 	 * @param P 3D vector of proportional gains for x,y,z axis
 	 */
-	void setPositionGains(const matrix::Vector3f &P) { _gain_pos_p = P; }
+	void setControlWeights(const matrix::Vector3f &P, const matrix::Vector3f &V,
+			const matrix::Vector4f &ATT, const matrix::Vector3f &OMG,
+			const matrix::Vector3f &F, const matrix::Vector3f &T)
+	{
+		_weight_pos = P;
+		_weight_vel = V;
+		_weight_att = ATT;
+		_weight_omg = OMG;
+		_weight_force = F;
+		_weight_torque = T;
+	}
 
 	/**
-	 * Set the velocity control gains
-	 * @param P 3D vector of proportional gains for x,y,z axis
-	 * @param I 3D vector of integral gains
-	 * @param D 3D vector of derivative gains
+	 * Set the weight matrices based on defined gains and enabled control components
 	 */
-	void setVelocityGains(const matrix::Vector3f &P, const matrix::Vector3f &I, const matrix::Vector3f &D);
+	void setWeightMatrices();
 
 	/**
 	 * Set the maximum velocity to execute with feed forward and position control
@@ -102,51 +117,19 @@ public:
 	void setThrustLimit(const float max);
 
 	/**
-	 * Set margin that is kept for horizontal control when prioritizing vertical thrust
-	 * @param margin of normalized thrust that is kept for horizontal control e.g. 0.3
-	 */
-	void setHorizontalThrustMargin(const float margin);
-
-	/**
-	 * Set the maximum tilt angle in radians the output attitude is allowed to have
-	 * @param tilt angle in radians from level orientation
-	 */
-	void setTiltLimit(const float tilt) { _lim_tilt = tilt; }
-
-	/**
-	 * Set the normalized hover thrust
-	 * @param hover_thrust [HOVER_THRUST_MIN, HOVER_THRUST_MAX] with which the vehicle hovers not accelerating down or up with level orientation
-	 */
-	void setHoverThrust(const float hover_thrust) { _hover_thrust = math::constrain(hover_thrust, HOVER_THRUST_MIN, HOVER_THRUST_MAX); }
-
-	/**
-	 * Update the hover thrust without immediately affecting the output
-	 * by adjusting the integrator. This prevents propagating the dynamics
-	 * of the hover thrust signal directly to the output of the controller.
-	 */
-	void updateHoverThrust(const float hover_thrust_new);
-
-	/**
 	 * Pass the current vehicle state to the controller
-	 * @param PositionMPCStates structure
+	 * @param SpacecraftMPCStates structure
 	 */
 
-	template <typename T> void setState(const T &states)
+	template <typename T> void setState(const T &states, vehicle_attitude_s &att, vehicle_angular_velocity_s &ang_vel)
 	{
 		_pos = states.position;
 		_vel = states.velocity;
-		_yaw = states.yaw;
-		_vel_dot = states.acceleration;
-	}
-
-	void setAttitudeStates(vehicle_attitude_s &att, vehicle_angular_velocity_s &ang_vel)
-	{
 		_att = matrix::Quatf(att.q);
 		_ang_vel(0) = ang_vel.xyz[0];
 		_ang_vel(1) = ang_vel.xyz[1];
 		_ang_vel(2) = ang_vel.xyz[2];
 	}
-
 
 	/**
 	 * Pass the desired setpoints
@@ -165,18 +148,6 @@ public:
 	 * @return true if update succeeded and output setpoint is executable, false if not
 	 */
 	bool update(const float dt);
-
-	/**
-	 * Set the integral term in xy to 0.
-	 * @see _vel_int
-	 */
-	void resetIntegral() { _vel_int.setZero(); }
-	void resetIntegralXY() { };
-
-	/**
-	 * If set, the tilt setpoint is computed by assuming no vertical acceleration
-	 */
-	void decoupleHorizontalAndVecticalAcceleration(bool val) { _decouple_horizontal_and_vertical_acceleration = val; }
 
 	/**
 	 * Get the controllers output local position setpoint
@@ -200,49 +171,41 @@ public:
 	static const trajectory_setpoint_s empty_trajectory_setpoint;
 
 private:
-	// The range limits of the hover thrust configuration/estimate
-	static constexpr float HOVER_THRUST_MIN = 0.05f;
-	static constexpr float HOVER_THRUST_MAX = 0.9f;
 
 	bool _inputValid();
 
-	void _positionControl(); ///< Position proportional control
-	void _velocityControl(const float dt); ///< Velocity PID control
-	void _accelerationControl(); ///< Acceleration setpoint processing
-
 	// Gains
-	matrix::Vector3f _gain_pos_p; ///< Position control proportional gain
-	matrix::Vector3f _gain_vel_p; ///< Velocity control proportional gain
-	matrix::Vector3f _gain_vel_i; ///< Velocity control integral gain
-	matrix::Vector3f _gain_vel_d; ///< Velocity control derivative gain
+	matrix::Vector3f _weight_pos; ///< Position weight
+	matrix::Vector3f _weight_vel; ///< Velocity weight
+	matrix::Vector4f _weight_att; ///< Attitude weight
+	matrix::Vector3f _weight_omg; ///< Angular velocity (omega) mpc weight
 
-	// Limits
-	float _lim_vel_horizontal{}; ///< Horizontal velocity limit with feed forward and position control
-	float _lim_vel_up{}; ///< Upwards velocity limit with feed forward and position control
-	float _lim_vel_down{}; ///< Downwards velocity limit with feed forward and position control
-	float _lim_thr_min{}; ///< Minimum collective thrust allowed as output [-1,0] e.g. -0.9
-	float _lim_thr_max{}; ///< Maximum collective thrust allowed as output [-1,0] e.g. -0.1
-	float _lim_thr_xy_margin{}; ///< Margin to keep for horizontal control when saturating prioritized vertical thrust
-	float _lim_tilt{}; ///< Maximum tilt from level the output attitude is allowed to have
+	// Multipliers - enable/disable subcomponents of the controller
+	float _pos_en; ///< Position control enabled
+	float _att_en; ///< Attitude control enabled
+	float _omg_en; ///< Angular velocity control enabled
 
-	float _hover_thrust{}; ///< Thrust [HOVER_THRUST_MIN, HOVER_THRUST_MAX] with which the vehicle hovers not accelerating down or up with level orientation
-	bool _decouple_horizontal_and_vertical_acceleration{true}; ///< Ignore vertical acceleration setpoint to remove its effect on the tilt setpoint
+	matrix::Vector3f _weight_force; ///< Force mpc weight
+	matrix::Vector3f _weight_torque; ///< Torque mpc weight
 
 	// States
 	matrix::Vector3f _pos; /**< current position */
 	matrix::Vector3f _vel; /**< current velocity */
 	matrix::Quatf _att; /**< current attitude */
 	matrix::Vector3f _ang_vel; /**< current angular velocity */
-	matrix::Vector3f _vel_dot; /**< velocity derivative (replacement for acceleration estimate) */
-	matrix::Vector3f _vel_int; /**< integral term of the velocity controller */
-	float _yaw{}; /**< current heading */
 
 	// Setpoints
 	matrix::Vector3f _pos_sp; /**< desired position */
 	matrix::Vector3f _vel_sp; /**< desired velocity */
-	matrix::Vector3f _acc_sp; /**< desired acceleration */
-	matrix::Vector3f _thr_sp; /**< desired thrust */
 	matrix::Quatf _att_sp; /**< desired heading */
-	matrix::Quatf _att_goal; /**< setpoint for attitude setpoint (first prediction) */
 	matrix::Vector3f _ang_vel_sp; /** desired yaw-speed */
+
+	// Outputs
+	matrix::Vector3f _thr_sp; /**< desired thrust */
+	matrix::Vector3f _trq_sp; /**< desired torque */
+	matrix::Quatf _att_goal; /**< desired heading */
+
+	// Limits
+	float _lim_thr_min; /**< minimum thrust */
+	float _lim_thr_max; /**< minimum thrust */
 };

@@ -31,13 +31,11 @@
 #
 ############################################################################
 
-px4_add_library(PositionMPC
-	ControlMath.cpp
-	ControlMath.hpp
-	PositionMPC.cpp
-	PositionMPC.hpp
+px4_add_library(SpacecraftMPC
+	SpacecraftMPC.cpp
+	SpacecraftMPC.hpp
 )
-target_include_directories(PositionMPC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(SpacecraftMPC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # px4_add_unit_gtest(SRC ControlMathTest.cpp LINKLIBS PositionControl)
 # px4_add_unit_gtest(SRC PositionControlTest.cpp LINKLIBS PositionControl)

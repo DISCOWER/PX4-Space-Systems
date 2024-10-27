@@ -31,18 +31,17 @@
 #
 ############################################################################
 
-add_subdirectory(PositionControl)
+add_subdirectory(SpacecraftMPC)
 
 px4_add_module(
-	MODULE modules__sc_pos_control
-	MAIN sc_pos_control
+	MODULE modules__sc_mpc_control
+	MAIN sc_mpc_control
 	COMPILE_FLAGS
 	SRCS
-		SpacecraftPositionControl.cpp
-		SpacecraftPositionControl.hpp
+		SpacecraftModelPredictiveControl.cpp
+		SpacecraftModelPredictiveControl.hpp
 	DEPENDS
-		SpacecraftPositionControl
-		controllib
+		SpacecraftMPC
 		geo
 		SlewRate
 	)
