@@ -83,8 +83,6 @@ with open(args.yaml_file, 'r') as file:
     msg_map = yaml.safe_load(file)
 
 # Read namespace and set default if not present
-# env_namespace = os.getenv('PX4_UXRCE_DDS_NS', None)
-# namespace = env_namespace if env_namespace is not None else msg_map.get('namespace', '')
 namespace = os.getenv('PX4_UXRCE_DDS_NS', '')
 
 merged_em_globals = {}
