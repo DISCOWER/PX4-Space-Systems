@@ -1,7 +1,7 @@
 # Here for PX4 Space?
 
 To test the SITL environment, run:
-  
+
   ```bash
   make px4_sitl gazebo-classic_2d_spacecraft__frictionless
   ```
@@ -18,12 +18,24 @@ Some of our changes are making their way to PRs on Gazebo, PX4-Autopilot and MAV
 Soon we will provide docker environments that you can use to build the binaries and deploy them. In case you follow the PX4 development guide on how to build the source code, the same instructions also apply to our fork.
 
 ### How can I use Gazebo Garden or up?
-To this end, you will need to build Gazebo Garden from source - [instructions here](https://gazebosim.org/docs/garden/install_ubuntu_src) - and change the `gz-sim7` package with our version available in DISCOWER [GitHub](https://github.com/DISCOWER/gz-sim/tree/pr-spacecraft-thrusters), and make sure you use the branch `pr-spacecraft-thrusters`. 
+To this end, you will need to build Gazebo Garden from source - [instructions here](https://gazebosim.org/docs/garden/install_ubuntu_src) - and change the `gz-sim7` package with our version available in DISCOWER [GitHub](https://github.com/DISCOWER/gz-sim/tree/pr-spacecraft-thrusters), and make sure you use the branch `pr-spacecraft-thrusters`.
 
 Then, you should build the PX4 Space Systems source code with
   ```bash
   make px4_sitl gz_spacecraft_2d
   ```
+
+### How can I use namespaces?
+Namespaces work in both simulation and on hardware.
+To give your controller a namespace in simulation, run:
+  ```
+  PX4_UXRCE_DDS_NS=<namespace> make px4_sitl gz_spacecraft_2d
+  ```
+To upload to micro-controller, e.g. Pixhawk 6X, and give it a namespace, run:
+  ```
+  PX4_UXRCE_DDS_NS=<namespace> make px4_fmu-v6x_spacecraft upload
+  ```
+Topics will then be in the form "/\<namespace\>/fmu/..."
 
 ### How can I use the custom QGroundControl?
 Please follow the source build instructions for [QGroundControl](https://docs.qgroundcontrol.com/master/en/qgc-dev-guide/getting_started/index.html) but use our version of QGroundControl [available here](https://github.com/DISCOWER/qgroundcontrol).
