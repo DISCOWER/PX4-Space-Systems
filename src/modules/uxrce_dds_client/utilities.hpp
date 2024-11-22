@@ -40,12 +40,13 @@ static bool generate_topic_name(char *topic_name, const char *client_namespace, 
 		version[0] = '\0';
 	}
 
-	if (client_namespace != nullptr) {
-		int ret = snprintf(topic_name, TOPIC_NAME_SIZE, "rt/%s/%s%s", client_namespace, topic, version);
-		return (ret > 0 && ret < TOPIC_NAME_SIZE);
+	int ret;
+	if (client_namespace && client_namespace[0] != '\0') {
+		ret = snprintf(topic_name, TOPIC_NAME_SIZE, "rt/%s/fmu/%s%s", client_namespace, topic, version);
+	} else {
+		ret = snprintf(topic_name, TOPIC_NAME_SIZE, "rt/fmu/%s%s", topic, version);
 	}
 
-	int ret = snprintf(topic_name, TOPIC_NAME_SIZE, "rt/%s%s", topic, version);
 	return (ret > 0 && ret < TOPIC_NAME_SIZE);
 }
 
