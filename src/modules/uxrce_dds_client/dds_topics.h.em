@@ -86,6 +86,9 @@ void SendTopicsSubs::reset() {
 
 void SendTopicsSubs::update(uxrSession *session, uxrStreamId reliable_out_stream_id, uxrStreamId best_effort_stream_id, uxrObjectId participant_id, const char *client_namespace)
 {
+	if (!client_namespace || client_namespace[0] == '\0') {
+		client_namespace = "@(namespace)";
+	}
 	int64_t time_offset_us = session->time_offset / 1000; // ns -> us
 
 	alignas(sizeof(uint64_t)) char topic_data[max_topic_size];
@@ -166,6 +169,9 @@ static void on_topic_update(uxrSession *session, uxrObjectId object_id, uint16_t
 
 bool RcvTopicsPubs::init(uxrSession *session, uxrStreamId reliable_out_stream_id, uxrStreamId reliable_in_stream_id, uxrStreamId best_effort_in_stream_id, uxrObjectId participant_id, const char *client_namespace)
 {
+	if (!client_namespace || client_namespace[0] == '\0') {
+		client_namespace = "@(namespace)";
+	}
 @[    for idx, sub in enumerate(subscriptions + subscriptions_multi)]@
 	{
 			uint16_t queue_depth = orb_get_queue_size(ORB_ID(@(sub['simple_base_type']))) * 2; // use a bit larger queue size than internal
