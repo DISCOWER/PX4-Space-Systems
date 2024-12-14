@@ -33,6 +33,47 @@
 
 add_subdirectory(SpacecraftMPC)
 
+
+option(SC_MPC_GENERATE_MODEL "spacecraft tinympc generate symforce output" ON)
+
+# Symforce code generation - check if symforce is available
+execute_process(
+    COMMAND ${PYTHON_EXECUTABLE} -m symforce.symbolic
+    RESULT_VARIABLE PYTHON_SYMFORCE_EXIT_CODE
+    OUTPUT_QUIET
+)
+
+set(TINYMPC_MODEL_GEN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/SpacecraftMPC/params)
+set(TINYMPC_MODEL_GEN_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/SpacecraftMPC/params)
+
+if(SC_MPC_GENERATE_MODEL AND (${PYTHON_SYMFORCE_EXIT_CODE} EQUAL 0))
+	# generate to build directory
+	set(MPC_DERIVATION_DST_DIR ${CMAKE_CURRENT_BINARY_DIR}/SpacecraftMPC/params)
+	file(MAKE_DIRECTORY ${MPC_DERIVATION_DST_DIR})
+
+	set(MPC_GENERATED_FILES ${MPC_DERIVATION_DST_DIR}/model.h)
+	set(MPC_GENERATED_DERIVATION_INCLUDE_PATH ${CMAKE_CURRENT_BINARY_DIR})
+
+	set(SYMFORCE_ARGS)
+
+	# if(NOT CONFIG_SC_MPC_GENERATE_INTERACTIVE)
+	# 	message(STATUS "sc_mpc: interactive generation")
+	# 	list(APPEND SYMFORCE_ARGS "--interactive")
+	# endif()
+	message("Calling derivation.py ...")
+	add_custom_command(
+		OUTPUT
+			${TINYMPC_MODEL_GEN_OUTPUT_DIR}/model.h
+		COMMAND
+			${PYTHON_EXECUTABLE} ${TINYMPC_MODEL_GEN_DIR}/derivation.py #--interactive # ${SYMFORCE_ARGS}
+
+		WORKING_DIRECTORY ${TINYMPC_MODEL_GEN_DIR}
+		COMMENT "Symforce code generation (default)"
+		USES_TERMINAL
+		VERBATIM
+	)
+endif()
+
 px4_add_module(
 	MODULE modules__sc_mpc_control
 	MAIN sc_mpc_control

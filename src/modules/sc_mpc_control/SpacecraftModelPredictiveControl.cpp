@@ -362,7 +362,7 @@ int SpacecraftModelPredictiveControl::print_usage(const char *reason)
 	logging.
 	)DESCR_STR");
 
-	PRINT_MODULE_USAGE_NAME("sc_pos_control", "controller");
+	PRINT_MODULE_USAGE_NAME("sc_mpc_control", "controller");
 	PRINT_MODULE_USAGE_COMMAND("start");
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 
