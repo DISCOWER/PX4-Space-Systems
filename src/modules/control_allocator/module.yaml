@@ -1256,7 +1256,7 @@ mixer:
                 type: 'spacecraft_2d'
                 title: 'Spacecraft 2D'
                 actuators:
-                  - actuator_type: 'thruster'
+                  - actuator_type: 'motor'
                     count: 'CA_THRUSTER_CNT'  # count would be too long for 16 max size
                     per_item_parameters:
                         standard:
@@ -1278,7 +1278,7 @@ mixer:
             14: # Sapcecraft 3D
                 title: 'Spacecraft 3D'
                 actuators:
-                  - actuator_type: 'thruster'
+                  - actuator_type: 'motor'
                     count: 'CA_THRUSTER_CNT'
                     per_item_parameters:
                         standard:

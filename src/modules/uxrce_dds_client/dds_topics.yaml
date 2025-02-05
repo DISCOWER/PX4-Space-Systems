@@ -80,11 +80,11 @@ publications:
   # - topic: /fmu/out/vehicle_trajectory_waypoint_desired
   #   type: px4_msgs::msg::VehicleTrajectoryWaypoint
 
-  # - topic: /fmu/out/actuator_motors
-  #   type: px4_msgs::msg::ActuatorMotors
+  - topic: /fmu/out/actuator_motors
+    type: px4_msgs::msg::ActuatorMotors
 
-  # - topic: /fmu/out/actuator_outputs
-  #   type: px4_msgs::msg::ActuatorOutputs
+  - topic: /fmu/out/actuator_outputs
+    type: px4_msgs::msg::ActuatorOutputs
 
   # - topic: /fmu/out/vehicle_torque_setpoint
   #   type: px4_msgs::msg::VehicleTorqueSetpoint
