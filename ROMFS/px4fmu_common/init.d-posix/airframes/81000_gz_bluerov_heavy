@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# @name BlueROV2 Heavy
+#
+# @type UUV
+#
+# @maintainer Pedro Roque <padr@kth.se>
+# @maintainer Nicola De Carli <ndc@kth.se>
+#
+
+. ${R}etc/init.d/rc.uuv_defaults
+
+PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
+PX4_GZ_WORLD=${PX4_GZ_WORLD:=default}
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=bluerov_heavy}
