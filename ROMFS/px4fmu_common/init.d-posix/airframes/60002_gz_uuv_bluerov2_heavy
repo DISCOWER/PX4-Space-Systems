@@ -11,6 +11,11 @@
 # Source PX4 parameters and configuration
 . ${R}/etc/init.d/rc.uuv_defaults
 
+PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
+PX4_GZ_WORLD=${PX4_GZ_WORLD:=underwater}
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=spacecraft_2d}
+
+
 # Set parameters using `param` utility for SITL
 param set-default MAV_1_CONFIG 102
 param set-default BAT1_A_PER_V 37.8798
