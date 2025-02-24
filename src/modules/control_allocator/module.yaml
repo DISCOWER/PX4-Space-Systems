@@ -33,6 +33,7 @@ parameters:
                 12: Helicopter (Coaxial)
                 13: Spacecraft 2D
                 14: Spacecraft 3D
+                # 16: UUV     # In the main repo of PX4, there is 13:Rover also
             default: 0
 
         CA_METHOD:
@@ -1296,3 +1297,29 @@ mixer:
                             label: 'Axis Z'
                             function: 'axisz'
                             advanced: true
+
+            # 16: # UUV
+            #     title: 'UUV'
+            #     actuators:
+            #       - actuator_type: 'motor'
+            #         count: 'CA_ROTOR_COUNT'
+            #         per_item_parameters:
+            #             standard:
+            #                 position: [ 'CA_ROTOR${i}_PX', 'CA_ROTOR${i}_PY', 'CA_ROTOR${i}_PZ' ]
+            #             extra:
+            #               - name: 'CA_ROTOR${i}_KM'
+            #                 label: 'Direction CCW'
+            #                 function: 'spin-dir'
+            #                 show_as: 'true-if-positive'
+            #               - name: 'CA_ROTOR${i}_AX'
+            #                 label: 'Axis X'
+            #                 function: 'axisx'
+            #                 advanced: true
+            #               - name: 'CA_ROTOR${i}_AY'
+            #                 label: 'Axis Y'
+            #                 function: 'axisy'
+            #                 advanced: true
+            #               - name: 'CA_ROTOR${i}_AZ'
+            #                 label: 'Axis Z'
+            #                 function: 'axisz'
+            #                 advanced: true
