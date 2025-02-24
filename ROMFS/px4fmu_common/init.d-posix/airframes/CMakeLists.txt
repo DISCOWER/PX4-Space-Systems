@@ -103,11 +103,11 @@ px4_add_romfs_files(
 	17001_flightgear_tf-g1
 	17002_flightgear_tf-g2
 
+	60002_uuv_bluerov2_heavy
+
 	71000_gazebo-classic_2d_spacecraft
 	71001_gazebo-classic_spacecraft_dart
 	71002_gz_spacecraft_2d
-
-	81000_gz_bluerov_heavy
 
 	# [22000, 22999] Reserve for custom models
 )
