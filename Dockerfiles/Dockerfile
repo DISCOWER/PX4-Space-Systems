@@ -122,7 +122,7 @@ RUN mkdir -p $home/QGroundControl && \
 ### PX4 messages compile
 RUN mkdir -p $home/PX4/ros2_ws/src && \
     cd $home/PX4/ros2_ws/src && \
-    git clone --recursive --depth=1 https://github.com/PX4/px4_msgs.git && \
+    git clone --recursive --depth=1 https://github.com/DISCOWER/px4_msgs.git && \
     cd $home/PX4/ros2_ws && \
     . /opt/ros/humble/setup.sh && colcon build --symlink-install && \
     echo "source $home/PX4/ros2_ws/install/setup.bash" >> $home/.bashrc
