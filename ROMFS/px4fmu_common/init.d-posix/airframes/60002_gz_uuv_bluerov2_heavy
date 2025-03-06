@@ -12,7 +12,7 @@
 . ${R}/etc/init.d/rc.uuv_defaults
 
 PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
-PX4_GZ_WORLD=${PX4_GZ_WORLD:=default}
+PX4_GZ_WORLD=${PX4_GZ_WORLD:=underwater}
 PX4_SIM_MODEL=${PX4_SIM_MODEL:=uuv_bluerov2_heavy}
 
 
