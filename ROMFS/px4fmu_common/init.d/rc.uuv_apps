@@ -5,17 +5,29 @@
 # NOTE: Script variables are declared/initialized/unset in the rcS script.
 #
 
+# Estimator Group Selection
+ekf2 start &
+
+# Start MicroDDS Client
+# uxrce_dds_client start -t udp -h 192.168.0.1 -n spacebot2
+# uxrce_dds_client start -t udp -p 8888
+
 #
 # Start Control Allocator
 #
 control_allocator start
 
 #
-# Start UUV Attitude Controller.
+# Start Rate Controller - same as Spacecraft
 #
-uuv_att_control start
+sc_rate_control start
 
 #
-# Start UUV Land Detector.
+# Start Attitude Controller - same as Spacecraft
 #
-land_detector start rover
+sc_att_control start
+
+#
+# Start Position Controller - same as Spacecraft
+#
+sc_pos_control start
