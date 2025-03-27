@@ -35,9 +35,7 @@ param set-default COM_POSCTL_NAVL 2
 param set-default FD_FAIL_P 0
 param set-default FD_FAIL_R 0
 
-
 # Set parameters using `param` utility for SITL
-
 param set-default CA_AIRFRAME 7
 
 param set-default CA_ROTOR_COUNT 8
@@ -104,12 +102,12 @@ param set-default SIM_GZ_EC_MIN6 0
 param set-default SIM_GZ_EC_MIN7 0
 param set-default SIM_GZ_EC_MIN8 0
 
-param set-default SIM_GZ_EC_MAX1 1
-param set-default SIM_GZ_EC_MAX2 1
-param set-default SIM_GZ_EC_MAX3 1
-param set-default SIM_GZ_EC_MAX4 1
-param set-default SIM_GZ_EC_MAX5 1
-param set-default SIM_GZ_EC_MAX6 1
-param set-default SIM_GZ_EC_MAX7 1
-param set-default SIM_GZ_EC_MAX8 1
+param set-default SIM_GZ_EC_MAX1 1000
+param set-default SIM_GZ_EC_MAX2 1000
+param set-default SIM_GZ_EC_MAX3 1000
+param set-default SIM_GZ_EC_MAX4 1000
+param set-default SIM_GZ_EC_MAX5 1000
+param set-default SIM_GZ_EC_MAX6 1000
+param set-default SIM_GZ_EC_MAX7 1000
+param set-default SIM_GZ_EC_MAX8 1000
 
