@@ -61,6 +61,7 @@ public:
 
 	void update() override
 	{
+		PX4_INFO("Value function at update call: %f", (double)_data.control[0]);
 		if (_topic.update(&_data)) {
 			updateValues(_data.reversible_flags, _thrust_factor, _data.control, actuator_motors_s::NUM_CONTROLS);
 		}
@@ -76,6 +77,7 @@ public:
 
 	static inline void updateValues(uint32_t reversible, float thrust_factor, float *values, int num_values)
 	{
+		PX4_INFO("Value function at updatValues call: %f", (double)values[0]);
 		if (thrust_factor > 0.f && thrust_factor <= 1.f) {
 			// thrust factor
 			//  rel_thrust = factor * x^2 + (1-factor) * x,
@@ -100,6 +102,7 @@ public:
 				}
 			}
 		}
+		PX4_INFO("Value function: %f", (double)values[0]);
 
 		for (int i = 0; i < num_values; ++i) {
 			if ((reversible & (1u << i)) == 0) {

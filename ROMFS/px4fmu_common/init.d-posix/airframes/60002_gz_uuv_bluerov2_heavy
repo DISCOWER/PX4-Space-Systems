@@ -1,0 +1,114 @@
+#!/bin/sh
+#
+# @name BlueROV2 Heavy
+#
+# @type UUV
+#
+# @maintainer Pedro Roque <padr@kth.se>
+# @maintainer Nicola De Carli <ndc@kth.se>
+#
+
+# Source PX4 parameters and configuration
+. ${R}/etc/init.d/rc.uuv_defaults
+
+PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
+PX4_GZ_WORLD=${PX4_GZ_WORLD:=underwater}
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=uuv_bluerov2_heavy}
+
+param set-default SIM_GZ_EN 1
+
+param set-default SENS_EN_GPSSIM 1
+param set-default SENS_EN_BAROSIM 1
+param set-default SENS_EN_MAGSIM 1
+param set-default COM_ARM_CHK_ESCS 0  # We don't have ESCs
+param set-default FD_ESCS_EN 0 # We don't have ESCs - but maybe we need this later?
+
+# Set proper failsafes
+param set-default COM_ACT_FAIL_ACT 0
+param set-default COM_LOW_BAT_ACT 0
+param set-default NAV_DLL_ACT 0
+param set-default GF_ACTION 1
+param set-default NAV_RCL_ACT 1
+param set-default COM_POSCTL_NAVL 2
+
+# disable attitude failure detection
+param set-default FD_FAIL_P 0
+param set-default FD_FAIL_R 0
+
+# Set parameters using `param` utility for SITL
+param set-default CA_AIRFRAME 7
+
+param set-default CA_ROTOR_COUNT 8
+param set-default CA_R_REV 255
+# param set-default CA_R_REV 0
+param set-default CA_ROTOR0_AX 1
+param set-default CA_ROTOR0_AY -1
+param set-default CA_ROTOR0_AZ 0
+param set-default CA_ROTOR0_KM 0
+param set-default CA_ROTOR0_PX 0.5
+param set-default CA_ROTOR0_PY 0.3
+param set-default CA_ROTOR0_PZ 0.2
+param set-default CA_ROTOR1_AX 1
+param set-default CA_ROTOR1_AY 1
+param set-default CA_ROTOR1_AZ 0
+param set-default CA_ROTOR1_KM 0
+param set-default CA_ROTOR1_PX 0.5
+param set-default CA_ROTOR1_PY -0.3
+param set-default CA_ROTOR1_PZ 0.2
+param set-default CA_ROTOR2_AX 1
+param set-default CA_ROTOR2_AY 1
+param set-default CA_ROTOR2_AZ 0
+param set-default CA_ROTOR2_KM 0
+param set-default CA_ROTOR2_PX -0.5
+param set-default CA_ROTOR2_PY 0.3
+param set-default CA_ROTOR2_PZ 0.2
+param set-default CA_ROTOR3_AX 1
+param set-default CA_ROTOR3_AY -1
+param set-default CA_ROTOR3_AZ 0
+param set-default CA_ROTOR3_KM 0
+param set-default CA_ROTOR3_PX -0.5
+param set-default CA_ROTOR3_PY -0.3
+param set-default CA_ROTOR3_PZ 0.2
+param set-default CA_ROTOR4_AZ -1
+param set-default CA_ROTOR4_KM 0
+param set-default CA_ROTOR4_PX 0.5
+param set-default CA_ROTOR4_PY 0.5
+param set-default CA_ROTOR5_AZ 1
+param set-default CA_ROTOR5_KM 0
+param set-default CA_ROTOR5_PX 0.5
+param set-default CA_ROTOR5_PY -0.5
+param set-default CA_ROTOR6_AZ 1
+param set-default CA_ROTOR6_KM 0
+param set-default CA_ROTOR6_PX -0.5
+param set-default CA_ROTOR6_PY 0.5
+param set-default CA_ROTOR7_KM 0
+param set-default CA_ROTOR7_PX -0.5
+param set-default CA_ROTOR7_PY -0.5
+
+param set-default SIM_GZ_EC_FUNC1 101
+param set-default SIM_GZ_EC_FUNC2 102
+param set-default SIM_GZ_EC_FUNC3 103
+param set-default SIM_GZ_EC_FUNC4 104
+param set-default SIM_GZ_EC_FUNC5 105
+param set-default SIM_GZ_EC_FUNC6 106
+param set-default SIM_GZ_EC_FUNC7 107
+param set-default SIM_GZ_EC_FUNC8 108
+
+param set-default SIM_GZ_EC_MIN1 1000
+param set-default SIM_GZ_EC_MIN2 1000
+param set-default SIM_GZ_EC_MIN3 1000
+param set-default SIM_GZ_EC_MIN4 1000
+param set-default SIM_GZ_EC_MIN5 1000
+param set-default SIM_GZ_EC_MIN6 1000
+param set-default SIM_GZ_EC_MIN7 1000
+param set-default SIM_GZ_EC_MIN8 1000
+
+param set-default SIM_GZ_EC_MAX1 2000
+param set-default SIM_GZ_EC_MAX2 2000
+param set-default SIM_GZ_EC_MAX3 2000
+param set-default SIM_GZ_EC_MAX4 2000
+param set-default SIM_GZ_EC_MAX5 2000
+param set-default SIM_GZ_EC_MAX6 2000
+param set-default SIM_GZ_EC_MAX7 2000
+param set-default SIM_GZ_EC_MAX8 2000
+

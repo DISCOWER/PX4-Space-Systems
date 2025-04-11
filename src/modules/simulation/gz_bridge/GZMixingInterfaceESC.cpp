@@ -78,7 +78,6 @@ bool GZMixingInterfaceESC::updateOutputs(bool stop_motors, uint16_t outputs[MAX_
 		gz::msgs::Actuators rotor_velocity_message;
 		rotor_velocity_message.mutable_velocity()->Resize(active_output_count, 0);
 		rotor_velocity_message.mutable_normalized()->Resize(active_output_count, 0);
-
 		for (unsigned i = 0; i < active_output_count; i++) {
 			rotor_velocity_message.set_velocity(i, outputs[i]);
 		}
