@@ -153,7 +153,7 @@ void SpacecraftRateControl::Run()
 				if (_vehicle_control_mode.flag_control_rates_enabled) {
 					// manual rates control - ACRO mode
 					const Vector3f man_rate_sp{manual_control_setpoint.roll,
-											   -manual_control_setpoint.pitch, 
+											   -manual_control_setpoint.pitch,
 											   manual_control_setpoint.yaw};
 
 					_rates_setpoint = man_rate_sp * 5;
@@ -179,6 +179,7 @@ void SpacecraftRateControl::Run()
 
 					_torque_setpoint(0) = _torque_setpoint(1) = 0.0;
 					_torque_setpoint(2) = math::constrain((manual_control_setpoint.yaw * _manual_torque_max), -1.f, 1.f);
+
 					// publish thrust and torque setpoints
 					vehicle_thrust_setpoint_s vehicle_thrust_setpoint{};
 					vehicle_torque_setpoint_s vehicle_torque_setpoint{};
@@ -246,7 +247,7 @@ void SpacecraftRateControl::Run()
 			// PX4_INFO("Rate: %f %f %f", (double)rates(0), (double)rates(1), (double)rates(2));
 			// PX4_INFO("Rate Setpoint: %f %f %f", (double)_rates_setpoint(0), (double)_rates_setpoint(1), (double)_rates_setpoint(2));
 			// PX4_INFO("Torque sp: %f %f %f", (double)torque_sp(0), (double)torque_sp(1), (double)torque_sp(2));
-			
+
 			// publish rate controller status
 			rate_ctrl_status_s rate_ctrl_status{};
 			_rate_control.getRateControlStatus(rate_ctrl_status);

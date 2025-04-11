@@ -444,7 +444,11 @@ bool MixingOutput::update()
 			all_disabled = false;
 
 			if (_armed.armed || (_armed.prearmed && _functions[i]->allowPrearmControl())) {
+				if (i == 0)
+					PX4_INFO("Value mixer: %f", (double)_functions[i]->value(_function_assignment[i]));
 				outputs[i] = _functions[i]->value(_function_assignment[i]);
+				if (i == 0)
+					PX4_INFO("Value from function in mixer: %f", (double)outputs[i]);
 
 			} else {
 				outputs[i] = NAN;
@@ -619,7 +623,11 @@ MixingOutput::output_limit_calc(const bool armed, const int num_channels, const 
 
 			for (int i = 0; i < num_channels; i++) {
 				// Ramp from disarmed value to currently desired output that would apply without ramp
+				if (i == 0)
+					PX4_INFO("Value before output limit calc single: %f", (double)output[i]);
 				uint16_t desired_output = output_limit_calc_single(i, output[i]);
+				if (i == 0)
+					PX4_INFO("Value after output limit calc single: %f", (double)desired_output);
 				_current_output_value[i] = _disarmed_value[i] + progress * (desired_output - _disarmed_value[i]);
 			}
 		}
@@ -627,7 +635,11 @@ MixingOutput::output_limit_calc(const bool armed, const int num_channels, const 
 
 	case OutputLimitState::ON:
 		for (int i = 0; i < num_channels; i++) {
+			if (i == 0)
+					PX4_INFO("Value before output limit calc single: %f", (double)output[i]);
 			_current_output_value[i] = output_limit_calc_single(i, output[i]);
+			if (i == 0)
+				PX4_INFO("Value after output limit calc single: %f", (double)_current_output_value[i]);
 		}
 
 		break;
