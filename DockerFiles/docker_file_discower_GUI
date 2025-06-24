@@ -1,0 +1,163 @@
+FROM kasmweb/core-ubuntu-jammy:1.14.0-rolling
+USER root
+ENV HOME /home/kasm-default-profile
+ENV STARTUPDIR /dockerstartup
+ENV INST_SCRIPTS $STARTUPDIR/install
+WORKDIR $HOME
+
+
+######### Customize Container Here ###########
+ARG KUH=/home/kasm-user
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y libomp5 zsh bash && \
+    rm -rf /var/lib/apt/list/* && \
+    echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    true
+
+
+
+#########
+# ROS 2 #
+#########
+# https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+ENV ROS_DISTRO humble
+ENV ROS_PYTHON_VERSION 3
+
+RUN add-apt-repository universe
+RUN apt-get update && apt install -y curl
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+RUN apt-get update && apt-get install -y \
+	software-properties-common \
+	build-essential \
+	python3-colcon-common-extensions \
+	python3-rosdep \
+	python3-vcstool \
+	&& rm -rf /var/lib/apt/lists*
+RUN rosdep init && rosdep update
+
+RUN apt-get update && apt-get install -y ros-humble-desktop
+
+RUN echo "source /opt/ros/humble/setup.bash" >> /home/kasm-user/.bashrc
+RUN ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash"]
+
+
+
+#############
+# Micro-ROS #
+#############
+# https://micro.ros.org/docs/tutorials/core/first_application_linux/
+RUN apt-get install -y python3-pip
+RUN pip install -U rosdep colcon-common-extensions jsonschema
+
+RUN mkdir -p /home/kasm-user/microros_ws/src && cd /home/kasm-user/microros_ws
+RUN git clone -b humble https://github.com/micro-ROS/micro_ros_setup.git /home/kasm-user/microros_ws/src/micro_ros_setup
+
+WORKDIR /home/kasm-user/microros_ws
+RUN rosdep update --rosdistro humble && rosdep install --from-paths src --ignore-src -y
+RUN . /opt/ros/humble/setup.sh && colcon build
+
+RUN ls /home/kasm-user/microros_ws/src/micro_ros_setup
+RUN echo "source /home/kasm-user/microros_ws/install/local_setup.bash" >> /home/kasm-user/.bashrc
+RUN . /home/kasm-user/microros_ws/install/local_setup.sh
+
+
+# Create firmware
+RUN . /opt/ros/humble/setup.sh && . /home/kasm-user/microros_ws/install/local_setup.sh && ros2 run micro_ros_setup create_firmware_ws.sh host
+RUN . /opt/ros/humble/setup.sh && . /home/kasm-user/microros_ws/install/local_setup.sh && ros2 run micro_ros_setup build_firmware.sh
+
+# Create mciro-ROS agent
+RUN . /opt/ros/humble/setup.sh && . /home/kasm-user/microros_ws/install/local_setup.sh && ros2 run micro_ros_setup create_agent_ws.sh
+RUN . /opt/ros/humble/setup.sh && . /home/kasm-user/microros_ws/install/local_setup.sh && ros2 run micro_ros_setup build_agent.sh
+
+
+
+#################
+# Gazebo Garden #
+#################
+# https://gazebosim.org/docs/garden/install_ubuntu_src
+RUN echo 'export PATH="/home/kasm-user/.local/bin:${PATH}"' >> /home/kasm-user/.bashrc
+
+RUN mkdir -p /home/kasm-user/gazebo_ws/src
+WORKDIR /home/kasm-user/gazebo_ws/src
+RUN wget https://raw.githubusercontent.com/gazebo-tooling/gazebodistro/master/collection-garden.yaml -P /home/kasm-user/gazebo_ws/src
+RUN ls /home/kasm-user/gazebo_ws/src
+RUN vcs import < collection-garden.yaml
+
+RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+RUN apt-get update
+
+RUN sudo apt -y install $(sort -u $(find . -iname 'packages-'`lsb_release -cs`'.apt' -o -iname 'packages.apt' | grep -v '/\.git/') | sed '/gz\|sdf/d' | tr '\n' ' ')
+
+
+
+##################
+# QGroundControl #
+##################
+RUN pip install aqtinstall
+RUN mkdir /home/kasm-user/qt 
+WORKDIR /kasm-user/qt
+RUN aqt install-qt --outputdir /home/kasm-user/qt linux desktop 6.6.3 gcc_64 -m qt5compat qtshadertools qtquick3d qtcharts qtconnectivity qtlocation qtmultimedia qtpositioning qtsensors qtserialport qtspeech
+
+# append folder to CMAKE_PREFIX_PATH
+RUN echo "export CMAKE_PREFIX_PATH=/home/kasm-user/qt/6.6.3/gcc_64/lib/cmake:$CMAKE_PREFIX_PATH" >> /home/kasm-user/.bashrc
+ENV CMAKE_PREFIX_PATH /home/kasm-user/qt/6.6.3/gcc_64/lib/cmake:$CMAKE_PREFIX_PATH
+ENV PATH /home/kasm-user/qt/6.6.3/gcc_64/bin:$PATH
+ENV LD_LIBRARY_PATH /home/kasm-user/qt/6.6.3/gcc_64/lib:$LD_LIBRARY_PATH
+ENV QT_PLUGIN_PATH /home/kasm-user/qt/6.6.3/gcc_64/plugins:$QT_PLUGIN_PATH
+
+RUN ls /home/kasm-user/qt/6.6.3
+# https://docs.qgroundcontrol.com/master/en/qgc-dev-guide/getting_started/index.html
+WORKDIR /home/kasm-user/qgroundcontrol
+RUN git clone --recursive https://github.com/DISCOWER/qgroundcontrol.git /home/kasm-user/qgroundcontrol
+RUN cd /home/kasm-user/qgroundcontrol && git submodule update --recursive
+RUN . /home/kasm-user/qgroundcontrol/tools/setup/install-dependencies-debian.sh
+RUN cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+RUN cmake --build build --config Debug
+
+
+
+##################
+# DISCOWER stuff #
+##################
+### CUSTOM GZ-SIM
+RUN pip install kconfiglib symforce pyros-genmsg future
+
+# We replace gz-sim with our DISCOWER version (for spacecraft)
+WORKDIR /home/kasm-user/gazebo_ws
+RUN cd /home/kasm-user/gazebo_ws/src
+RUN rm -rf /home/kasm-user/gazebo_ws/src/gz-sim && git clone -b pr-spacecraft-thrusters https://github.com/DISCOWER/gz-sim.git /home/kasm-user/gazebo_ws/src/gz-sim
+
+#RUN apt-get update && apt-get install -y libgz-cmake3-dev
+RUN ls /home/kasm-user/gazebo_ws/src
+RUN . /opt/ros/humble/setup.sh && colcon build --merge-install
+
+RUN echo "source /home/kasm-user/gazebo_ws/install/setup.bash" >> /home/kasm-user/.bashrc
+
+### PX4-SPACE-SYSTEMS
+RUN mkdir /home/kasm-user/discower_gits
+WORKDIR /home/kasm-user/discower_gits
+RUN git clone https://github.com/DISCOWER/PX4-Space-Systems.git /home/kasm-user/discower_gits/PX4-Space-Systems
+
+### PX4_MSGS
+RUN mkdir -p /home/kasm-user/ff_ws/src
+RUN git clone https://github.com/DISCOWER/px4_msgs.git /home/kasm-user/ff_ws/src/px4_msgs
+WORKDIR /home/kasm-user/ff_ws
+RUN . /opt/ros/humble/setup.sh && colcon build
+
+RUN echo "source /home/kasm-user/ff_ws/install/setup.bash" >> /home/kasm-user/.bashrc
+
+######### End Customizations ###########
+
+RUN mkdir -p /home/kasm-user/Desktop/Uploads
+
+RUN chown 1000:0 $HOME
+RUN $STARTUPDIR/set_user_permission.sh $HOME
+ENV HOME /home/kasm-user
+WORKDIR $HOME
+RUN mkdir -p $HOME && chown -R 1000:0 $HOME
+USER 1000
