@@ -96,7 +96,6 @@ if(gz-transport_FOUND)
 		windy
 		baylands
   		lawn
-		kthspacelab
 	)
 
 	# find corresponding airframes
