@@ -2,7 +2,11 @@
 
 We made all our documentation available in [ATMOS](https://atmos.discower.io/). Feel free to contact us or to post an Issue in case you have problems with the setup. For contributions, we regularly review Pull-Requests to this repository.
 
-**NOTE:** We are currently merging PX4Space with [PX4 Autopilot](https://github.com/PX4/PX4-Autopilot). The current repository will be maintained until further notice.
+-----
+**NEWS (24th July, 2025):** We are currently merging PX4Space with [PX4 Autopilot](https://github.com/PX4/PX4-Autopilot). Most functionality is already available in the PX4 Autopilot repository, and we are working on merging the remaining features. The PX4 Autopilot is now the main entry point for PX4Space, and it is where you should submit issues and pull requests for PX4Space, related with `spacecraft` vehicle types. Part of this
+
+Part of this change is `px4_msgs`, which should track [PX4/px4_msgs](https://github.com/PX4/px4_msgs) and not [DISCOWER/px4_msgs](https://github.com/DISCOWER/px4_msgs) anymore. In case you still need the PX4-Space-Systems repository (this repository), please use the branch `px4space-legacy` of [DISCOWER/px4_msgs](https://github.com/DISCOWER/px4_msgs).
+-----
 
 # PX4 Drone Autopilot
 
