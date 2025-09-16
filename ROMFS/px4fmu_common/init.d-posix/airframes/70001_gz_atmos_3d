@@ -41,113 +41,113 @@ param set-default FD_FAIL_P 0
 param set-default FD_FAIL_R 0
 
 param set-default CA_ROTOR0_PX 0.0
-param set-default CA_ROTOR0_PY -0.12
-param set-default CA_ROTOR0_PZ 0.0
+param set-default CA_ROTOR0_PY 0.0
+param set-default CA_ROTOR0_PZ 0.17
 param set-default CA_ROTOR0_CT 1.5
 param set-default CA_ROTOR0_AX 1.0
 param set-default CA_ROTOR0_AY 0.0
 param set-default CA_ROTOR0_AZ 0.0
 
 param set-default CA_ROTOR1_PX 0.0
-param set-default CA_ROTOR1_PY -0.12
-param set-default CA_ROTOR1_PZ 0.0
+param set-default CA_ROTOR1_PY 0.0
+param set-default CA_ROTOR1_PZ 0.17
 param set-default CA_ROTOR1_CT 1.5
 param set-default CA_ROTOR1_AX -1.0
 param set-default CA_ROTOR1_AY 0.0
 param set-default CA_ROTOR1_AZ 0.0
 
 param set-default CA_ROTOR2_PX 0.0
-param set-default CA_ROTOR2_PY 0.12
-param set-default CA_ROTOR2_PZ 0.0
+param set-default CA_ROTOR2_PY 0.0
+param set-default CA_ROTOR2_PZ -0.17
 param set-default CA_ROTOR2_CT 1.5
 param set-default CA_ROTOR2_AX 1.0
 param set-default CA_ROTOR2_AY 0.0
 param set-default CA_ROTOR2_AZ 0.0
 
 param set-default CA_ROTOR3_PX 0.0
-param set-default CA_ROTOR3_PY 0.12
-param set-default CA_ROTOR3_PZ 0.0
+param set-default CA_ROTOR3_PY 0.0
+param set-default CA_ROTOR3_PZ -0.17
 param set-default CA_ROTOR3_CT 1.5
 param set-default CA_ROTOR3_AX -1.0
 param set-default CA_ROTOR3_AY 0.0
 param set-default CA_ROTOR3_AZ 0.0
 
-param set-default CA_ROTOR4_PX 0.0
+param set-default CA_ROTOR4_PX 0.17
 param set-default CA_ROTOR4_PY 0.0
-param set-default CA_ROTOR4_PZ -0.12
+param set-default CA_ROTOR4_PZ 0.0
 param set-default CA_ROTOR4_CT 1.5
 param set-default CA_ROTOR4_AX 0.0
 param set-default CA_ROTOR4_AY 1.0
 param set-default CA_ROTOR4_AZ 0.0
 
-param set-default CA_ROTOR5_PX 0.0
+param set-default CA_ROTOR5_PX 0.17
 param set-default CA_ROTOR5_PY 0.0
-param set-default CA_ROTOR5_PZ -0.12
+param set-default CA_ROTOR5_PZ 0.0
 param set-default CA_ROTOR5_CT 1.5
 param set-default CA_ROTOR5_AX 0.0
 param set-default CA_ROTOR5_AY -1.0
 param set-default CA_ROTOR5_AZ 0.0
 
-param set-default CA_ROTOR6_PX 0.0
+param set-default CA_ROTOR6_PX -0.17
 param set-default CA_ROTOR6_PY 0.0
-param set-default CA_ROTOR6_PZ 0.12
+param set-default CA_ROTOR6_PZ 0.0
 param set-default CA_ROTOR6_CT 1.5
 param set-default CA_ROTOR6_AX 0.0
 param set-default CA_ROTOR6_AY 1.0
 param set-default CA_ROTOR6_AZ 0.0
 
-param set-default CA_ROTOR7_PX 0.0
+param set-default CA_ROTOR7_PX -0.17
 param set-default CA_ROTOR7_PY 0.0
-param set-default CA_ROTOR7_PZ 0.12
+param set-default CA_ROTOR7_PZ 0.0
 param set-default CA_ROTOR7_CT 1.5
 param set-default CA_ROTOR7_AX 0.0
 param set-default CA_ROTOR7_AY -1.0
 param set-default CA_ROTOR7_AZ 0.0
 
-param set-default CA_ROTOR8_PX -0.12
-param set-default CA_ROTOR8_PY 0.0
+param set-default CA_ROTOR8_PX 0.0
+param set-default CA_ROTOR8_PY 0.17
 param set-default CA_ROTOR8_PZ 0.0
 param set-default CA_ROTOR8_CT 1.5
 param set-default CA_ROTOR8_AX 0.0
 param set-default CA_ROTOR8_AY 0.0
 param set-default CA_ROTOR8_AZ 1.0
 
-param set-default CA_ROTOR9_PX -0.12
-param set-default CA_ROTOR9_PY 0.0
+param set-default CA_ROTOR9_PX 0.0
+param set-default CA_ROTOR9_PY 0.17
 param set-default CA_ROTOR9_PZ 0.0
 param set-default CA_ROTOR9_CT 1.5
 param set-default CA_ROTOR9_AX 0.0
 param set-default CA_ROTOR9_AY 0.0
 param set-default CA_ROTOR9_AZ -1.0
 
-param set-default CA_ROTOR10_PX 0.12
-param set-default CA_ROTOR10_PY 0.0
+param set-default CA_ROTOR10_PX 0.0
+param set-default CA_ROTOR10_PY -0.17
 param set-default CA_ROTOR10_PZ 0.0
 param set-default CA_ROTOR10_CT 1.5
 param set-default CA_ROTOR10_AX 0.0
 param set-default CA_ROTOR10_AY 0.0
 param set-default CA_ROTOR10_AZ 1.0
 
-param set-default CA_ROTOR11_PX 0.12
-param set-default CA_ROTOR11_PY 0.0
+param set-default CA_ROTOR11_PX 0.0
+param set-default CA_ROTOR11_PY -0.17
 param set-default CA_ROTOR11_PZ 0.0
 param set-default CA_ROTOR11_CT 1.5
 param set-default CA_ROTOR11_AX 0.0
 param set-default CA_ROTOR11_AY 0.0
 param set-default CA_ROTOR11_AZ -1.0
 
-param set-default SIM_GZ_EC_FUNC1 501
-param set-default SIM_GZ_EC_FUNC2 502
-param set-default SIM_GZ_EC_FUNC3 503
-param set-default SIM_GZ_EC_FUNC4 504
-param set-default SIM_GZ_EC_FUNC5 505
-param set-default SIM_GZ_EC_FUNC6 506
-param set-default SIM_GZ_EC_FUNC7 507
-param set-default SIM_GZ_EC_FUNC8 508
-param set-default SIM_GZ_EC_FUNC9 509
-param set-default SIM_GZ_EC_FUNC10 510
-param set-default SIM_GZ_EC_FUNC11 511
-param set-default SIM_GZ_EC_FUNC12 512
+param set-default SIM_GZ_EC_FUNC1 101
+param set-default SIM_GZ_EC_FUNC2 102
+param set-default SIM_GZ_EC_FUNC3 103
+param set-default SIM_GZ_EC_FUNC4 104
+param set-default SIM_GZ_EC_FUNC5 105
+param set-default SIM_GZ_EC_FUNC6 106
+param set-default SIM_GZ_EC_FUNC7 107
+param set-default SIM_GZ_EC_FUNC8 108
+param set-default SIM_GZ_EC_FUNC9 109
+param set-default SIM_GZ_EC_FUNC10 110
+param set-default SIM_GZ_EC_FUNC11 111
+param set-default SIM_GZ_EC_FUNC12 112
 
 param set-default SIM_GZ_EC_MIN1 0
 param set-default SIM_GZ_EC_MIN2 0
@@ -175,27 +175,27 @@ param set-default SIM_GZ_EC_MAX10 10000
 param set-default SIM_GZ_EC_MAX11 10000
 param set-default SIM_GZ_EC_MAX12 10000
 
-# Controller Tunings
-param set SC_YAWRATE_P 3.335
-param set SC_YAWRATE_I 0.87
-param set SC_YAWRATE_D 0.15
-param set SC_YR_INT_LIM 0.2
-param set SC_YAW_P 3.0
+# # Controller Tunings
+# param set SC_YAWRATE_P 3.335
+# param set SC_YAWRATE_I 0.87
+# param set SC_YAWRATE_D 0.15
+# param set SC_YR_INT_LIM 0.2
+# param set SC_YAW_P 3.0
 
-param set SC_PITCHRATE_P 3.335
-param set SC_PITCHRATE_I 0.87
-param set SC_PITCHRATE_D 0.15
-param set SC_PR_INT_LIM 0.2
-param set SC_PITCH_P 3.0
+# param set SC_PITCHRATE_P 3.335
+# param set SC_PITCHRATE_I 0.87
+# param set SC_PITCHRATE_D 0.15
+# param set SC_PR_INT_LIM 0.2
+# param set SC_PITCH_P 3.0
 
-param set SC_ROLLRATE_P 3.335
-param set SC_ROLLRATE_I 0.87
-param set SC_ROLLRATE_D 0.15
-param set SC_RR_INT_LIM 0.2
-param set SC_ROLL_P 3.0
+# param set SC_ROLLRATE_P 3.335
+# param set SC_ROLLRATE_I 0.87
+# param set SC_ROLLRATE_D 0.15
+# param set SC_RR_INT_LIM 0.2
+# param set SC_ROLL_P 3.0
 
-param set SPC_POS_P 0.20
-param set SPC_VEL_P 6.55
-param set SPC_VEL_I 0.0
-param set SPC_VEL_D 0.0
-param set SPC_VEL_MAX 12.0
+# param set SPC_POS_P 0.20
+# param set SPC_VEL_P 6.55
+# param set SPC_VEL_I 0.0
+# param set SPC_VEL_D 0.0
+# param set SPC_VEL_MAX 12.0
