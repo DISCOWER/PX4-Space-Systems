@@ -24,6 +24,9 @@ PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
 PX4_GZ_WORLD=${PX4_GZ_WORLD:=default}
 PX4_SIM_MODEL=${PX4_SIM_MODEL:=atmos}
 
+param set-default COM_RC_IN_MODE 1 # Don't expect RC, we use offboard control
+param set-default UXRCE_DDS_AG_IP 2130706433
+
 param set-default SIM_GZ_EN 1
 
 param set-default SENS_EN_MAGSIM 1
